@@ -43,7 +43,7 @@ A fully observable MDP is a tuple (S, A, D, T, R), where:
 
 \end{definition}
 
-Every MDP is solving its problem according to its movement policies. As the number of policies itself can be exponential, we are going to relax their definition as well.
+Every MDP is solving its problem according to its movement policies. As the number of policies itself can be high order polynomial, we are going to relax their definition as well.
 \\ \\
 \begin{definition}[\textbf{Markovian Policy}]
 A probabilistic (deterministic) history-dependent policy $\pi: H \times A \rightarrow [ \,0, 1] \,(\pi: H \rightarrow A)$ is \textit{Markovian} if for any two histories $h_{s,t}$ and $h'_{s,t}$, both of which end in the same state $s$ at the same time step $t$, and for any action $a$, 
@@ -78,6 +78,99 @@ It turns out that this approach is even better as it guarantees a fundamental pr
 This part will briefly introduce a few fundamental algorithms for MDPs solving: Brute-Force algorithm, Policy Iteration, Value Iteration, and show a possible solution for its disadvantages: Prioritizations. \\
 After reading this section, the reader should know the possibilities of solving MDP and be ready for the following section, where we will discuss the finite horizon's advantages.
 
+\subsubsection{Brute-Force Algorithm}
+Brute-force algorithm, as its name suggests, is the one most naive algorithm, that is similar for all classes of problem solving. In the proccess of evaluating the problem, the method evaluates all possible combinations and chooses the best one.
+And it is obviously not used in vast majority of cases for this reason as the Algorithm needs to evaluate $|S|^{A}$ policies.
+$S$ in the previous equation represents states and $A$ actions.
+
+However, as the number of states, or actions, rises, the number of such evaluation becomes huge. Another problem comes from the fact, that actions in the environment are not deterministic and often cyclic. Both of these problems results in steep complexity rise.
+
+That is why another approach comes in.
+
+\subsubsection{An iterative approach to policy evaluation}
+
+The evaluation of cyclic environments requires suitable equation which captures all movements, transition and rewards in it.
+That means: value function of every state should correspond to sum of rewards for moving towards successor states. Moreover, the agent should maximize its reward by getting to goal, so the value function of the successor state multiplied by its probability should also appear in equation. This formula can be written as:\\
+\begin{equation}
+\begin{aligned}
+V^{\pi} (s) & = 0 && \text{(if $s \in G$)} \\
+& = sum_{s' \in S} T(s, \pi (s), s') [ \,C(s, \pi(s), s') + V^{\pi} (s')] \, && \text{(otherwise)}
+\end{aligned}
+\end{equation}
+
+This system of linear equation reduced the complexity of previous approach. It \textit{can} be solved using Gaussian Elimination in $O(|S|^3)$. It is still not enough efficient, but its idea can be used to solve it with \textbf{an iterative approach}.
+
+The iterative approach does exactly what it says. 
+It starts with rough estimations and continuously works its way up to the same solution as of the linear system. In addition, this solution is also optimal \cite{Kolobov2012}. As It stores previous iteration it can be described as a part of dynamic programming. Every iteration of this algorithm runs in $O(|S|^2)$.
+
+\LinesNumbered
+\begin{algorithm}[H]
+\SetAlgoLined
+//Assumption: $\pi$ is proper (ends up in a goal state) \\
+initialize $V^{\pi}_0$ arbitrarily for each state \\
+$n \xleftarrow{} 0$ \\
+\Repeat{$ max_{s\in S} residual_n (s) \leq \epsilon$}{
+$n \xleftarrow{} n + 1$ \\
+\ForEach{$ s \in S $}{
+compute $V^{\pi}_n (s) \xleftarrow{} \sum_{s' \in S} T (s, \pi (s), s') [ \,C(s, \pi (s), s') + V^{\pi}_{n−1} (s') ] \,$ \\
+compute $residual_n (s) \xleftarrow{} |V^{\pi}_n (s) − V^{\pi}_{n−1} (s)| $ \\
+}
+}
+return $V^{\pi}_n$
+\caption{Iterative Policy Evaluation}
+\end{algorithm}
+
+Now we know how to evaluate the states of the environment given some policy, but we did not yet described how to choose the best policy for given evaluation. 
+
+\subsubsection{Policy iteration}
+Given the fact that result of iterative policy evaluation is optimal after undefined number of iterations for specific policy, we can further improve it by iterating between policy evaluation and policy improvement.
+For every iteration, we have \textif{almost} optimal policy evaluation for previous policy and with that we can improve the policy by iterating over possible actions from all states and choose that action, if is has better results, than previous one. The algorithm stops when the policy remains without a change at the end of following iteration.
+
+\LinesNumbered
+\begin{algorithm}[H]
+\SetAlgoLined
+initialize $\pi_0$ to be an arbitrary proper policy \\
+$n \xleftarrow{} 0$ \\
+\Repeat{$\pi_n == \pi_{n−1}$ }{
+    $n \xleftarrow{} n + 1$ \\
+    Policy Evaluation: compute $V^{\pi_{n−1}}$ \\
+    Policy Improvement: \\
+    \ForEach{state $s \in S$}{
+        $ \pi_n (s) \xleftarrow{} \pi_{n−1} (s) $ \\
+        $ \forall a \in A$ compute $Q^{(V^{\pi_{n−1}})} (s, a) $ \\
+        $ V_n (s) \xleftarrow{} min_{a \in A} Q^{(V^{\pi_{n−1}})} (s, a) $ \\
+        \uIf{$ Q^{(V^{\pi_{n−1}})} (s, \pi_{n−1} (s)) > V_n (s)$}{
+            $ \pi_n (s) \xleftarrow{} argmin_{a \in A} Q^{(V^{\pi_{n−1}})} (s, a)$
+        }
+    \textbf{end}
+    }
+}
+return $\pi_n$
+\caption{Policy Iteration}
+\end{algorithm}
+
+
+\\
+\\
+\\
+\\
+\\
+\\
+\\
+\\
+\\
+\\
+
+
+\LinesNumbered
+\begin{algorithm}[H]
+\SetAlgoLined
+initialize $V_0$ arbitrarily for each state \\
+$n \xleftarrow{} 0$ \\ 
+\Repeat{$max_{s \in S} residual_n (s) \let \epsilon$}{$n \xleftarrow{} n + 1$ \\\ForEach{$s \in S$}{compute $V_n (s)$ using Bellman backup at $s$\\ compute $residual_n (s) = |V_n (s) - V_{n-1} (s)|$}}
+return greedy policy: $\pi^{V_n} (s) = argmin_{a\inA} \sum_{s'\inS} \tau(s, a, s')[ \,C(s, a, s') + V_n (s')] \,$
+\caption{Value Iteration}
+\end{algorithm}
 
 
 \LinesNumbered
@@ -85,13 +178,10 @@ After reading this section, the reader should know the possibilities of solving 
 \SetAlgoLined
 initialize $V_0$ arbitrarily for each state \\
 $n \xleftarrow{} 0$ \\
-\Repeat{$max_{s \in S} residual_n (s) \let \epsilon$}{
-    $n \xleftarrow{} n + 1$ \\
-    \ForEach{$s \in S$}{
-        compute $V_n (s)$ using Bellman backup at $s$\\
-        compute $residual_n (s) = |V_n (s) - V_{n-1} (s)|$
-    }
-}
-return greedy policy: $\pi^{V_n} (s) = argmin_{a \in A} \sum_{s' \in S} \tau(s, a, s')[ \,C(s, a, s') + V_n (s')] \,$
+\Repeat{$ max_{s \in S} residual_n (s) \let \epsilon $}{}
+return greedy policy: $\pi^{V_n} (s) = argmin_{a\inA} \sum_{s'\inS} \tau(s, a, s')[ \,C(s, a, s') + V_n (s')] \,$
 \caption{Value Iteration}
 \end{algorithm}
+
+
+
