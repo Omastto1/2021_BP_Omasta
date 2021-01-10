@@ -87,6 +87,51 @@ To define the MDP instance, we have to define the methods declared in \textit{Ju
 The following releases' goals are to improve the performance, implement Infinite-Horizon MDP wrapper, and implement Finite-Horizon solver for POMDPs.
 
 
-\subsection{Benchmark}
+\section{Benchmark}
+To prove the efficiency of implemented Finite-Horizon solver, we present a benchmark of Finite-Horizon MDP instance solved by
+\begin{itemize}
+    \item Value Iteration implemented in JuliaPOMDP/DiscreteValueIteration.jl
+    \item Finite-Horizon Value Iteration solver implemented in this project in JuliaPOMDP/FiniteHorizonPOMDPs.jl package.
+\end{itemize}
 
+\subsection{MDP Instances}
 
+To compare the results obtained, the instance has \textit{num\_of\_states * finite\_horizon} states for both solvers.
+
+The instances were defined as 1D GridWorld problem with goal states on its right and left ends. The possible actions are \textit{move to left} and \textit{move to right}. The cost of such a move is 1, and the reward for moving to the goal is -10. Goals are terminal states and can not be left. The discount factor is one and the noise 0.6.
+
+The benchmark were be performed on 3 different instance sizes:
+\begin{itemize}
+    \item \textbf{Instance 1} $states = 999, horizon = 500$,
+    \item \textbf{Instance 2} $states = 99, horizon = 50$, and
+    \item \textbf{Instance 3} $states = 9, horizon = 5$.
+\end{itemize}
+
+\subsection{Comparison}
+
+The benchmark resulted in following:
+
+\subsubsection{Instance 1}
+
+\begin{itemize}
+    \item \textbf{Value Iteration} 183.729947 seconds (3.48 G allocations: 244.793 GiB),
+    \item \textbf{Finite-Horizon Value Iteration}   0.566122 seconds (7.17 M allocations: 579.764 MiB)
+\end{itemize}
+
+\subsubsection{Instance 2}
+
+\begin{itemize}
+    \item \textbf{Value Iteration} 1.082094 seconds (4.41 M allocations: 292.613 MiB)
+    \item \textbf{Finite-Horizon Value Iteration}   0.199167 seconds (241.17 k allocations: 14.231 MiB)
+\end{itemize}
+
+\subsubsection{Instance 3}
+
+\begin{itemize}
+    \item \textbf{Value Iteration} 0.643639 seconds (1.08 M allocations: 51.450 MiB)
+    \item \textbf{Finite-Horizon Value Iteration}   0.200691 seconds (172.53 k allocations: 8.653 MiB)
+\end{itemize}  
+
+We tested each benchmark's results to be the same.
+
+The benchmarks show that the acyclic graphs with the optimal backup policy result in optimal policy and perform precisely both time-wise and memory-wise. We expect the results to be even better in the following versions.

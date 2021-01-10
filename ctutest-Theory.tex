@@ -8,7 +8,7 @@ In the previous chapter, we have briefly introduced MDPs. In this chapter, we wi
 The environment that we introduced so far contains states, actions, transition probabilities, and costs for each action. However, we did not assign any rules to it! 
 Without these rules, one can not create any connection between states and actions or actions and transition probabilities.
 
-The environmental rules could range anywhere from the ones applied in the crossword puzzle game (fully observable, deterministic, sequential, static, discrete with single-agent) up to the ones applied in the taxi driving planning (partially observable, stochastic, sequential, dynamic, continuous with multiple agents). We will not describe the meaning of all specific rules in this paper, as it is not the project's task. In case the reader is interested, we refer to read  \cite{russel2010} PRIDAT STRANKY DO REFERENCE asi 45-48.
+The environmental rules could range anywhere from the ones applied in the crossword puzzle game (fully observable, deterministic, sequential, static, discrete with single-agent) up to the ones applied in the taxi driving planning (partially observable, stochastic, sequential, dynamic, continuous with multiple agents). We will not describe the meaning of all specific rules in this paper, as it is not the project's task. In case the reader is interested, we refer to read  \cite{russel2010}.
 
 \newpage
 
@@ -25,7 +25,9 @@ For the sake of simplicity, let us assume the following properties of the given 
 
 
 \section{MDP and its features}
-With environmental properties sorted out, let us move on to MDPs themselves. \\
+With environmental properties sorted out, let us move on to MDPs themselves. 
+\\ 
+\\
 The definitions, algorithms and the construction of following chapters draw on from \cite{Kolobov2012}. 
   \\ \\
 
@@ -36,8 +38,8 @@ A fully observable MDP is a tuple (S, A, D, T, R), where:
   \item[$\bullet$ ] $A$ is the finite set of all actions an agent can take;
   \item[$\bullet$ ] $D$ is a finite or infinite sequence of the natural numbers of the form $(1, 2, 3, \ldots, T_{max})$ or $(1, 2, 3, \ldots)$ respectively, 
         denoting the decision epochs, also called time steps, at which agent needs to act;
-  \item[$\bullet$ ] $T : S \times A \times S \rightarrow [ \,0, 1] \,$ is a transition function, a mapping specifying the probability $T(s_1, a, s_2)$ of going to state $s_2$ if action $a$ is executed when the agent is in state $s_1$ at time step $t$;
-  \item[$\bullet$ ] $R : S \times A \times S \rightarrow R$ is a reward function that gives a finite numeric reward value $R(s_1, a, s_2)$ obtained when the system goes from state $s_1$ to state $s_2$ as a result of executing action $a$ at time step $t$.
+  \item[$\bullet$ ] $T : S \times A \times S \times D \rightarrow [ \,0, 1] \,$ is a transition function, a mapping specifying the probability $T(s_1, a, s_2, t)$ of going to state $s_2$ if action $a$ is executed when the agent is in state $s_1$ at time step $t$;
+  \item[$\bullet$ ] $R : S \times A \times S \times D \rightarrow R$ is a reward function that gives a finite numeric reward value $R(s_1, a, s_2, t)$ obtained when the system goes from state $s_1$ to state $s_2$ as a result of executing action $a$ at time step $t$.
 \end{description}
 
 \end{definition}
@@ -58,13 +60,13 @@ The value function of a policy is then: \\ \\
 Let $h_{s,t}$ be a history that terminates at state $s$ and time $t$. Let $R^{\pi_{h_{s,t}}}_{t'}$ be random variables for the amount of reward obtained in an MDP as a result of executing policy $\pi$ starting in state $s$ for all time steps $t'$ s.t. $t \leqslant t' \leqslant |D|$ if the MDP ended up in state $s$ at time $t$ via history $h_{s,t}$.The value function $V^{\pi}: H \rightarrow [ \,−\infty,\infty] \,$ \textit{of a history-dependent policy} $\pi$ is a utility function $u$ of the reward sequence $R^{\pi_{h_{s,t}}}_t, R^{\pi_{h_{s,t}}}_{t+1}, \ldots$ that one can accumulate by executing $\pi$ at time steps $t, t + 1,\ldots$  after history $h_{s,t}$. Mathematically, $V^{\pi} (h_{s,t}) = u(R^{\pi_{h_{s,t}}}_t , R^{\pi_{h_{s,t}}}_{t+1}, \ldots)$.
 \end{definition}
 
-Among the policies evaluated according to the previous rule, we will be able to find an \textbf{optimal MDP solution} denoted as $\pi^*$ with value $V^*$ called the optimal value function. Such optimal solution then satisfies $V^{*} (h) \geqslant V^{\pi} (h)$ for all histories $h \in H$.
+Among the policies evaluated according to the previous rule, we will be able to find an \textbf{optimal MDP solution} denoted as $\pi^*$ with value $V^*$ called the optimal value function. Such optimal solution then satisfies $V^{*} (h) \leqslant V^{\pi} (h)$ for all histories $h \in H$.
 
 One of the possible approaches to evaluate the value function is using Expected Linear Additive Utility.
 \\
 \begin{definition}[\textbf{Expected Linear Additive Utility}]
 An \textit{expected linear additive utility} function is a function $u(R_t, R_{t+1}, \ldots) = E[ \,\sum_{t'=t}^{|D|} \gamma ^{t'−t} R_{t'}] \, = E[ \,\sum_{t'=0}^{|D|-t} \gamma^{t'} R_{t'+t}] \,$ that computes the utility of a
-reward sequence as the expected sum of (possibly discounted) rewards in this sequence, where $gamma \geqslant 0$
+reward sequence as the expected sum of (possibly discounted) rewards in this sequence, where $\gamma \geqslant 0$
 is the discount factor.
 \end{definition}
 
@@ -79,8 +81,8 @@ After reading this section, the reader should know the possibilities of solving 
 
 \subsection{Brute-Force Algorithm}
 As its name suggests, the Brute-force algorithm is the most naive algorithm, similar to all classes of problem-solving. In evaluating the problem, the method evaluates all possible combinations and chooses the best one.
-Moreover, computer scientists are not using it in the vast majority of cases because the algorithm needs to evaluate $|S|^{A}$ policies.
-$S$ in the previous equation represents states and $A$ actions.
+Moreover, computer scientists are not using it in the vast majority of cases because the algorithm needs to evaluate $|S|^{|A|}$ policies.
+$S$ in the previous equation represents states and $A$ represents actions.
 
 However, as the number of states, or actions, rises, such evaluation becomes enormous. Another problem comes from the fact that actions in the environment are not deterministic and often cyclic. Both of these problems results in a steep complexity rise.
 
@@ -154,7 +156,7 @@ Nevertheless, another algorithm can solve this drawback.
 
 
 \subsection{Value iteration}
-Value iteration focuses on improving value functions of states, instead of evaluating the policy. The algorithm creates policy at its very end as the action that minimizes the cost in given state. Thanks to this property, the initial policies are not used in the algorithm, and thus can not lead to divergence.
+Value iteration focuses on improving value functions of states, instead of evaluating the policy. The algorithm creates policy at its very end as the action that minimizes the cost in given state. Thanks to this property, the initial policies are not used in the algorithm, and can not lead to divergence.
 
 \textit{The algorithm is based on \textbf{Bellman equations}, which mathematically express the optimal solution of an MDP.}
 
@@ -197,7 +199,7 @@ return greedy policy: $\pi^{V_n} (s) = argmin_{a \in A} \sum_{s' \in S} \tau(s, 
 
 
 \subsection{Prioritization}
-\textit{One of the most significant drawbacks of Value Iteration is that it requires full sweeps of the state space}. This drawback results in many value function states evaluated, but its value remains the same because value function updates are heading from goal states. It can take lots of iterations to evaluate all the successor state's value functions. Furthermore, due to cyclic moves, the speed of convergence among states can differ.
+\textit{One of the most significant drawbacks of Value Iteration is that it requires full sweeps of the state space}. This drawback results in many unnecessary value function evaluations because its value remains the same as the value function updates are heading from goal states at first. It can take lots of iterations to evaluate all the successor state's value functions. Furthermore, due to cyclic moves, the speed of convergence among states can differ.
 
 Both of these problems often result in flawed performing algorithm executions.
 
@@ -245,8 +247,10 @@ $$priority_{IPS} (s) \xleftarrow{} \frac{Res^{V} (s)}{V (s)} $$
 \subsubsection{Focused Dynamic Programming}
 
 Focused Dynamic Programming is a particular case of prioritization techniques used when the start state $s_0$ is known. In such cases, the start case's knowledge can be employed and added as a penalty factor.
-
+\newpage
 $$priority_{FDP} \xleftarrow{} h(s) + V(s)$$
+
+
 where:
 \begin{description}[1cm]
   \item[h(s)] \textit{is lower bound on the expected cost of reaching s from $s_0$}, and
