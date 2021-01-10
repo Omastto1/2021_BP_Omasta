@@ -8,7 +8,15 @@
 
 \DeclareUnicodeCharacter{2212}{-}
 \usepackage[ruled,vlined]{algorithm2e}
+\usepackage{float}
 
+\documentclass{article}
+\renewenvironment{description}[1][0pt]
+  {\list{}{\labelwidth=0pt \leftmargin=#1
+   \let\makelabel\descriptionlabel}}
+  {\endlist}
+
+\parindent=0pt
 
 \ctusetup{
 	preprint = \ctuverlog,
@@ -126,60 +134,9 @@ V Praze, \ctufield{day}.~\monthinlanguage{title}~\ctufield{year}
 
 \input{ctutest-Theory}
 
-\input{ctutest-2}
+\input{ctutest-Implementation}
 
-\chapter{Introduction}
-
-This thesis shows that \ldots
-
-\begin{figure}[!h]
-\rule{3cm}{3cm}
-\caption{Test}
-\end{figure}
-
-
-\part{Your Party}
-
-\blindmathtrue
-
-\blinddocument
-
-\begin{table}
-\begin{ctucolortab}
-\begin{tabular}{cc}
-\bfseries Foo & \bfseries Bar \\\Midrule
-foo1 & bar1 \\
-foo2 & bar2
-\end{tabular}
-\end{ctucolortab}
-\caption{Foobar.}
-\label{tab:foobar}
-\end{table}
-
-\begin{figure}
-\includegraphics[width=0.4\textwidth]{ctu_logo_black}
-\caption{Black logo of the CTU in Pragueueue.}
-\end{figure}
-
-\begin{figure}[!t]
-\includegraphics[width=0.4\textwidth]{ctu_logo_blue}
-\caption{Blue logo of the CTU in Pragueueue.}
-\end{figure}
-
-\chapter{Conclusions}
-
-\section{Test --- this is just a little test of something in the table of contents}
-
-\subsection{Yes, table of contents}
-
-\begin{theorem}\begin{enumerate} \item Bla \item Blo \end{enumerate} \end{theorem}
-
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis interdum facilisis urna, at tincidunt leo consectetur non. Maecenas bibendum mi vitae libero pharetra, ac ullamcorper nulla pellentesque. Sed sit amet massa nunc. Aenean placerat a est sodales sagittis. Quisque purus nibh, auctor ut consectetur at, suscipit non erat. Donec condimentum porttitor risus, vitae fringilla lectus tincidunt nec. Nulla leo quam, commodo eu ornare non, iaculis sed nulla. Duis gravida lacus quis purus sodales, vitae malesuada justo ultricies. Vestibulum nisl nulla, commodo non pellentesque a, fringilla a risus. Ut quis magna nulla. Mauris vitae ultricies ante, in consectetur justo. 
-
-\medskip
-
-\begin{proof}\begin{enumerate} \item[8] Bla \item Blo \end{enumerate} \end{proof}
+\input{ctutest-Conclusion}
 
 \appendix
 
@@ -190,6 +147,6 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis interdum facilisis
 \bibliographystyle{amsalpha}
 \bibliography{ctutest}
 
-\ctutemplate{specification.as.chapter}
+% \ctutemplate{specification.as.chapter}
 
 \end{document}
