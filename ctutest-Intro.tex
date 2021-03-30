@@ -2,12 +2,12 @@
 
 \chapter{Introduction}
 
-MDP's are one of the most well-known methods used for solving stochastic planning problems. In the last couple of years, a new programming language, Julia, has emerged into the scientific community's consciousness. While offering a high-level approach comparable to the one of Python, it also offers a similar speed of languages like C or C++ at the same time. As the new users come to this language, the demand for new tools rises. The subject of this work answers these calls and deals with implementing one of those methods, finite-horizon MDPs interface for Julia's POMDPs.jl package.
+Markov Decision Problems are one of the most well-known methods used for solving stochastic planning problems. In the last couple of years, a new programming language, Julia, has emerged into the scientific community's consciousness. While offering a high-level approach comparable to the one of Python, it also offers a similar speed of languages like C or C++ at the same time. As the new users come to this language, the demand for new tools rises. The subject of this work answers these calls and deals with implementing one of those methods, finite-horizon MDPs interface for Julia's POMDPs.jl package.
 
 \section{Markov Decision Processes}
-The Markov decision processes are a part of the optimization problem solvers.
-The term MDP was probably first used in \cite{cite:1} and was derived from the name of Russian mathematician Andrey Markov who researched stochastic processes, on which are MDPs based \cite{wiki:1}.
-The problems that are MDPs solving are described with the environment. The environment consists of the states and actions (with corresponding stochastic transitions) for which the agent either pays a cost or receives reward (negative cost). The agent's task is to minimize his reward. The problem can be finite or infinite according to the problem's description.
+The Markov decision processes (MDPs) are a part of the optimization problem solvers.
+The term MDP was probably first used in \cite{cite:1} and was derived from the name of Russian mathematician Andrey Markov who researched stochastic processes, on which are MDPs based.
+The MDP problems are described with the environment. The environment consists of the states and actions (with corresponding stochastic transitions) for which the agent either pays a cost or receives reward (negative cost). The agent's task is to minimize his reward. The problem can be finite or infinite according to the problem's description.
 
 \section{Julia}
 Julia is a young language that starts to receive traction for its features. According to \cite{JuliaStars} the number of stars on its repository \cite{JuliaLang} tripled over the last 20 months and is rising steadily.
@@ -16,7 +16,7 @@ It combines the performance of low-level languages like Fortran or C with the hi
 
 
 \section{POMDPs.jl}
-\textit{POMDPs.jl is a package providing a core interface for working with MDPs and POMDPs} \cite{JMLR:v18:16-300}. It offers the user a unified interface for custom problem definitions, problem interfaces for simpler ones, and multiple solvers for both MDPs and POMDPs. The package is managed by Stanford University and is under active development.
+\textit{POMDPs.jl is a package providing a core interface for working with MDPs and POMDPs} \cite{JMLR:v18:16-300}. It offers the user a unified interface for custom problem definitions, problem interfaces for simpler ones, and multiple solvers for both MDPs and Partially observable MDPs (POMDPs). The package is managed by Stanford University and is under active development.
 
 
 \section{Goal}

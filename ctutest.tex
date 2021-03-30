@@ -10,7 +10,7 @@
 \usepackage[ruled,vlined]{algorithm2e}
 \usepackage{float}
 
-\documentclass{article}
+%\documentclass{article}
 \renewenvironment{description}[1][0pt]
   {\list{}{\labelwidth=0pt \leftmargin=#1
    \let\makelabel\descriptionlabel}}
@@ -92,7 +92,7 @@
 
 % Abstract in Czech
 \begin{abstract-czech}
-Do povědomí vědecké komunity se začíná prodírat nový programovací jazyk, Julia. Díky svému prudkému nárustu uživatelské báze a svému prostředí postavenému na open-source knihovnách, se dá očekávat, že se stave jedním z nejpopulárnějších jazyků. V této práci představíme Julii, MDP, teorii s nimi spjatou spolu s možnými přístupy k jejich řešení. Postupně ukážeme jejich výhody i nevýhody a nakonec se dostane k Finite-Horizon MDP, jako jednou z nejpokročilejších metod. Navrhneme design Finite-Horizon MDP rozhraní na základě koncepce z JuliaPOMDP/FiniteHorizonPOMDPs.jl \cite{FHPOMDP}, implementujeme jej a porovnáme s value iteration řešením DiscreteValueIteration.jl \cite{DVI} implementovaným v knihovně JuliaPOMDP's \cite{JuliaPOMDP}.
+Do povědomí vědecké komunity se začíná dostávat nový programovací jazyk, Julia. Díky svému prudkému nárustu uživatelské báze a svému prostředí postavenému na open-source knihovnách, se dá očekávat, že se stane jedním z nejpopulárnějších jazyků. V této práci představíme Julii, MDP, teorii s nimi spjatou spolu s možnými přístupy k jejich řešení. Postupně ukážeme jejich výhody i nevýhody a nakonec se dostaneme k Finite-Horizon MDP, jako jedné z nejpokročilejších metod. Navrhneme design Finite-Horizon MDP rozhraní na základě koncepce z JuliaPOMDP/FiniteHorizonPOMDPs.jl \cite{FHPOMDP}, implementujeme jej a porovnáme s value iteration řešením DiscreteValueIteration.jl \cite{DVI} implementovaným v knihovně JuliaPOMDP's \cite{JuliaPOMDP}.
 \end{abstract-czech}
 
 % Abstract in English
@@ -144,9 +144,8 @@ V Praze, \ctufield{day}.~\monthinlanguage{second}~\ctufield{year}
 
 \appendix
 
-\printindex
+% \printindex
 
-\appendix
 
 \bibliographystyle{amsalpha}
 \bibliography{ctutest}
