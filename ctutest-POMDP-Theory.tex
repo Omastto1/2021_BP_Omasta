@@ -3,6 +3,35 @@
 
 \chapter{Theory}
 
+Many real-world applications contain noisy feedback from its surroundings and as such their model does not fit into MDP representation. Having not deterministic stimulation results in a stochastic perception of the agent's state. Furthermore, the agent needs to store information about its possible location through the history of its stimulation. These stochastic features (although still covering only part of real-world models) demand a more general model for their representation - Partially Observable Markov Decision Problems. 
+
+\section{Environment}
+\begin{definition}[\textbf{Partially Observable Markov Decision Process (POMDP)}]\label{def:POMDP}
+POMDPs \cite{Shani2013} are formally defined as a tuple $(S, A, T, R, \Omega, O, b_0)$, where:
+\begin{description}
+  \item[$\bullet$ ] \textit{S, A, T, R} are an \label{MDP} as defined above, often called the \textit{underlying} MDP of the POMDP.
+  \item[$\bullet$ ] $\Omega$ is a set of possible observations. For example, in the robot navigation problem, $\Omega$ may
+consist of all possible immediate wall configurations.
+  \item[$\bullet$ ] \textit{O} is an observation function, where $O(a,s^t, o) = Pr(o_{t+1}|a_t,s_{t+1})$ is the probability of
+observing \textit{o} given that the agent has executed action \textit{a}, reaching state \textit{$s^t$}. \textit{O} can model
+robotic sensor noise, or the stochastic appearance of symptoms given a disease.
+  \item[$\bullet$ ] $b_0$ is an initial belief distribution.
+\end{description}
+
+\end{definition}
+
+\section{belief state and its updates}
+Belief state \cite{Walraven19} is a $|S|$ long vector of probabilities $b(s)$ representing the distribution of presence in all states according to the agent's action and observation history.
+One way to store information about the actual belief state distribution is through the history sequence as a tuple of a single action followed by a single observation for each time step. Such data storage requires additional memory to exist. However, this inconvenience can be removed by propagating the action and observation effects into already stored belief vectors. Thanks to the Markovian features and Bayes' rule, the belief state vector update can be expressed as following:
+$$ b_o^a(s') = \dfrac{P(o|a, s')}{P(o|b, a)} \sum_{s\inS} P(s'|s, a) b(s),$$
+where $P(o|b, a)$ corresponds to the probability to observe \textit{o} after executing action \textit{a} in belief \textit{b}. This probability is calculated as follows:
+$$ P(o|b, a) = \sum{s'\inS}P(o|a, s')\sum{s\inS}P(s'|s, a)b(s).$$
+
+This term serves as the normalizing constant. In [TODO: odkaz na BeliefUpdaters.jl], the normalizing constant is replaced with the norm of state vector update. Such solution is faster, but has no means to stop the execution if the probability is zero.
+
+Thanks to its efficiency, the beliefs are used in the majority of POMDP solvers.
+
+
 \section{POMDPs and its features}
 
 \section{value function infinite horizon}

@@ -127,3 +127,41 @@ year = {2012}
    url = {https://julialang.org/},
    urldate = {2021-01-10}
 }
+
+@Article{Shani2013,
+author={Shani, Guy
+and Pineau, Joelle
+and Kaplow, Robert},
+title={A survey of point-based POMDP solvers},
+journal={Autonomous Agents and Multi-Agent Systems},
+year={2013},
+month={Jul},
+day={01},
+volume={27},
+number={1},
+pages={1-51},
+abstract={The past decade has seen a significant breakthrough in research on solving partially observable Markov decision processes (POMDPs). Where past solvers could not scale beyond perhaps a dozen states, modern solvers can handle complex domains with many thousands of states. This breakthrough was mainly due to the idea of restricting value function computations to a finite subset of the belief space, permitting only local value updates for this subset. This approach, known as point-based value iteration, avoids the exponential growth of the value function, and is thus applicable for domains with longer horizons, even with relatively large state spaces. Many extensions were suggested to this basic idea, focusing on various aspects of the algorithm---mainly the selection of the belief space subset, and the order of value function updates. In this survey, we walk the reader through the fundamentals of point-based value iteration, explaining the main concepts and ideas. Then, we survey the major extensions to the basic algorithm, discussing their merits. Finally, we include an extensive empirical analysis using well known benchmarks, in order to shed light on the strengths and limitations of the various approaches.},
+issn={1573-7454},
+doi={10.1007/s10458-012-9200-2},
+url={https://doi.org/10.1007/s10458-012-9200-2}
+}
+
+
+@article{Walraven19,
+author = {Walraven, Erwin and Spaan, Matthijs T. J.},
+title = {Point-Based Value Iteration for Finite-Horizon POMDPs},
+year = {2019},
+issue_date = {May 2019},
+publisher = {AI Access Foundation},
+address = {El Segundo, CA, USA},
+volume = {65},
+number = {1},
+issn = {1076-9757},
+url = {https://doi.org/10.1613/jair.1.11324},
+doi = {10.1613/jair.1.11324},
+abstract = {Partially Observable Markov Decision Processes (POMDPs) are a popular formalism for sequential decision making in partially observable environments. Since solving POMDPs to optimality is a difficult task, point-based value iteration methods are widely used. These methods compute an approximate POMDP solution, and in some cases they even provide guarantees on the solution quality, but these algorithms have been designed for problems with an infinite planning horizon. In this paper we discuss why state-of-the-art point-based algorithms cannot be easily applied to finite-horizon problems that do not include discounting. Subsequently, we present a general point-based value iteration algorithm for finite-horizon problems which provides solutions with guarantees on solution quality. Furthermore, we introduce two heuristics to reduce the number of belief points considered during execution, which lowers the computational requirements. In experiments we demonstrate that the algorithm is an effective method for solving finite-horizon POMDPs.},
+journal = {J. Artif. Int. Res.},
+month = may,
+pages = {307–341},
+numpages = {35}
+}
