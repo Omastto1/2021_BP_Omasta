@@ -1,3 +1,5 @@
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
 
 \part{POMDPs}
 
@@ -20,23 +22,158 @@ robotic sensor noise, or the stochastic appearance of symptoms given a disease.
 
 \end{definition}
 
-\section{belief state and its updates}
+\section{Belief state and its updates}
 Belief state \cite{Walraven19} is a $|S|$ long vector of probabilities $b(s)$ representing the distribution of presence in all states according to the agent's action and observation history.
 One way to store information about the actual belief state distribution is through the history sequence as a tuple of a single action followed by a single observation for each time step. Such data storage requires additional memory to exist. However, this inconvenience can be removed by propagating the action and observation effects into already stored belief vectors. Thanks to the Markovian features and Bayes' rule, the belief state vector update can be expressed as following:
-$$ b_o^a(s') = \dfrac{P(o|a, s')}{P(o|b, a)} \sum_{s\inS} P(s'|s, a) b(s),$$
+$$ b_o^a(s') = \dfrac{P(o|a, s')}{P(o|b, a)} \sum_{s \in S} P(s'|s, a) b(s),$$
 where $P(o|b, a)$ corresponds to the probability to observe \textit{o} after executing action \textit{a} in belief \textit{b}. This probability is calculated as follows:
-$$ P(o|b, a) = \sum{s'\inS}P(o|a, s')\sum{s\inS}P(s'|s, a)b(s).$$
+$$ P(o|b, a) = \sum_{s' \in S} P(o|a, s')\sum_{s \in S} P(s'|s, a)b(s).$$
 
 This term serves as the normalizing constant. In [TODO: odkaz na BeliefUpdaters.jl], the normalizing constant is replaced with the norm of state vector update. Such solution is faster, but has no means to stop the execution if the probability is zero.
 
 Thanks to its efficiency, the beliefs are used in the majority of POMDP solvers.
 
+\section{Value functions for POMDPs}
+As the POMDPs do not have fully observable states, their goal is to find a sequence of actions $\{a_0, \ldots, a_t\}$ where each action corresponds to a maximized value function of a given belief. The value function can be formulated as:
+$$V(b) = \max_{a \in A} [R(b, a) + \gamma \sum_{b' \in B} T(b, a, b') V(b')].$$
+The value function $V(b)$ holds one $|S|$ long $\alpha$-vector representing a hyper-plane for each belief in POMDP belief space, constituting to a set of $\alpha$-vectors $V = \{\alpha_0, \alpha_1, \ldots, \alpha_m\}$. Value function $V(b)$ can be computed as maximal linear combination of an $\alpha$-vector and belief: $V(b) = \max_{\alpha \in V} \sum_{s \in S} \alpha (s) * b(s)$.
 
-\section{POMDPs and its features}
+This equation can be further rewritten as a value iteration algorithm adjustment \cite{Shani2013}. The proccess is called exact value iteration and in each iteration, the value function is updated across the entire belief space. The exact value iteration's result is, however, a pure heavy lifter, in terms of its complexity. For each possible action, observation and $\alpha$-vector of old value function, the algorithm computes new $\alpha$-vector, costing $O(|V| \times |A| \times |\Omega| \times |S^2|)$. The alpha vector is then summed with the reward corresponding to a given action and cross-summed across the observation space and unioned across the action space, adding another $O(|A| \times |S| \times |V|^{|\Omega|}$ to the resulting complexity of a single iteration. 
 
-\section{value function infinite horizon}
+#TODO rozepsat predesly odstavec / prepsat / zminit celkovou komplexitu.
+#TODO ZMINIT ZE SPOLU S VALUE FUNKCI SE UKLADAJI I AKCE - mozna az do implementace
 
-\section{value function finite horizon}
+Keeping in mind the exhaustive size of POMDPs' size of belief spaces, the exact value iteration algorithm's utility is quickly vanishing with the growing size of the problems. 
+
+Most of the POMDP problems are unlikely to reach most of the points in the belief simplex. To reduce the complexity of solving POMDPs, approximations are at hand. In the past, approximation algorithms were introduced (\cite{10.2307/171496} suggests creating grid-based belief set or TODO: PRIDAT DALSI ALGORITMUS). These algorithms, however, relied on naive approximations which turned out to be inaccurate in the case of sparse grids, or computationally expensive in the case of dense grids.
+
+Problems described above can be overcome by adopting yet another strategy. Given the most probable belief states, the solver can focus on finding only their corresponding $\alpha$-vectors and thus reduce the computation overhaul. This algorithm is called Point-Based Value Iteration (PBVI).
+
+The PBVI \cite{pbvi} is an anytime algorithm - it starts in $b_0$ and iteratively improves its value function and expands its belief space. The belief space $B = {b_0, b_1, \ldots, b_m}$ stores the the most probable belief vectors. The value function is updated for each belief vector, but unlike other approximation algorithms, its value function spans over the whole belief space instead of only one belief vector.
+
+Thanks to being an anytime algorithm, the user is able to stop the solver just when he wants it to. Effectively exchanging computation time and solution quality. The user is also able to choose how precise the gap between iterations of value updates will be.
+
+IMPROVE FUNCTION
+
+The value function improvement, or backup, is an adjustment of the value update from (TODO REFERENCE NA VZORECEK). It maintains only one $\alpha$-vector per belief vector, It also chooses only the best $\alpha$, pruning the dominated vectors twice, at each argmax expression, and reducing the complexity of algorithm. The backup can be compactly written as:
+
+$$backup(V, b) = \operatorname*{argmax}_{\alpha_{a}^{b}:a \in A, \alpha in V} b \cdot \alpha_{a}^{b}$$
+$$\alpha_{a}^{b} = r_a + \gamma \sum_{o \in \Omega} \operatorname*{argmax}_{\alpha^{a, o}:\alpha \in V} b \cdot \alpha^{a, o},$$
+
+where
+
+$$\alpha^{a, o} (s) = \sum_{s' \in S} \alpha (s') O (a, s', o) T(s, a, s').$$
+
+TODO DOPLNIT REFERENCE NA VZORECKY
+
+This form starts with the same vector projection as in the exact value update, but the belief space is limited, containing only $|B|$, $|S|$ long vectors. Thus reducing the complexity to polynomial time $|S|^2|A||V'||O|$.  
+DOPSAT ....
+
+The backup runs until the convergence of pair $\alpha$-vectors, or until a predefined number of iterations.
+
+EXPAND FUNCTION
+
+After the completion of back-up process, the algorithm continues with the expansion. At this point, the goal is to reduce the error bound as much as possible. This is performed by greedily expanding the belief set with a new furthest belief accessible from each stored belief. The choice of the distance metric is not crucial as the results appear to be identical, authors of the algorithm also recommend to add 1 new belief per 1 old \cite{pbvi}.
+
+$$|b' - B|_L = \operatorname*{min}_{b \in B} |b - b'|_L$$
+
+$$b' = \operatorname*{max}_{a, o} |b^{a, o} - B|_L$$
+
+
+
+
+ALTERNATIVNI ALGORITMY
+
+
+
+
+
+
+
+$$\Gamma^{a, *} \xleftarrow{} \alpha^{a, *} (s) = R(s, a)$$
+$$\Gamma^{a, o} \xleftarrow{} \alpha^{a, o} (s) = \gamma \sum_{s' \in S} T(s, a, s') \Omega (o, s', a) \alpha'_i (s'), \forall \alpha'_i \in V'$$
+
+
+
+
+
+\LinesNumbered
+\begin{algorithm}[H]
+\SetAlgoLined
+$B \xleftarrow{} {b_0}$\\
+\While{\textit{V has not converged to $V^*$}}{
+    $Improve(V, B)$\\
+    $B \xleftarrow{} Expand(B)$\\
+}
+\caption{PBVI}
+\end{algorithm}
+
+\LinesNumbered
+\begin{algorithm}[H]
+\SetAlgoLined
+\Repeat{\textit{V has converged} \tcc{repeat the above until V stops improving for all points in B}}{
+    \ForEach{$b \in B$}{
+        $\alpha \xleftarrow{} backup(b, V)$ \tcc{execute a backup operation on all points in B in arbitrary order}\\
+        $V \xleftarrow{} V \bigcup \{\alpha\}$
+    }
+}
+\caption{PBVI Improve}
+\end{algorithm}
+
+\LinesNumbered
+\begin{algorithm}[H]
+\SetAlgoLined
+$B_{new} \xleftarrow{} B$ 
+\ForEach{$b \in B$}{
+    $Successors(b) \xleftarrow{} \{b^{a, o}|Pr(o|b, a) > 0\}$\\
+    $B_{new} \xleftarrow{} B_{new} \bigcup \operatorname*{argmax}_{b' \in Successors(b)} \norm{B,b'}_L$ \tcc{add the furthest successor of b}
+}
+\caption{PBVI Expand}
+\end{algorithm}
+
+
+
+\begin{algorithm}[H]
+\SetKwFunction{FMain}{Main}
+\SetKwProg{Fn}{Function}{:}{}
+\Fn{\FMain{$f$, $a$, $b$, $\varepsilon$}}{
+\LinesNumbered
+\SetAlgoLined
+    $B_{new} \xleftarrow{} B$ 
+    \ForEach{$b \in B$}{
+        $Successors(b) \xleftarrow{} \{b^{a, o}|Pr(o|b, a) > 0\}$\\
+        $B_{new} \xleftarrow{} B_{new} \bigcup \operatorname*{argmax}_{b' \in Successors(b)} \norm{B,b'}_L$ \tcc{add the furthest successor of b}
+    }
+}
+\caption{PBVI Expand}
+\end{algorithm}
+
+Vzorec pro iterativni value funkci 
+
+Point based value iteration
+
+zase nejakej vzorec
+
+algoritmy general a popis
+
+algoritmus improve a popis
+
+algoritmus expand a popis
+
+popis moznych zlepseni PBVI - PERSEUS, ...
+
+
+
+
+
+
+
+
+\section{POMDPS and its features}
+
+\section{Value function infinite horizon}
+
+\section{Value function finite horizon}
 
 \section{solvers}
 

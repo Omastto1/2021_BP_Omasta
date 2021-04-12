@@ -15,3 +15,49 @@ popsani toho jak to fungovalo predtim a jak jsem to upravil
 
 \section{FiniteHorizonPointBasedValueIteration.jl}
 popis implementace
+
+
+
+
+
+
+
+Implementation
+
+PBVI
+
+The PBVI algorithm is stored in repo PointBasedValueIteration.jl and is partially based on former algorithm stored in the same place. The former algorithm, however, worker only for 2 states and completely omited the expansion phase, as the initial belief space was initiated with discrete distribution of beliefs.
+
+
+The algorithm accepts problems defined in JuliaPOMDP/POMDPs.jl interface.
+
+
+
+To some extent, the algorithm was written with list comprehensions or vectorizations, where it made sense. The utilization of vectorization was limited due to Julia's speed, often making the vectorizations slower than using for loops.
+
+
+
+The PBVI's setting are handed over by the PBVISolver structure, which accepts following parameters:
+num\_iteration, precision, verbose
+
+The solve parameters are in line with POMDPs interface. That is, method solve accepts two parameters, solver's settings and POMDP to be solved. 
+
+
+FIVI - TO BE COMPLETED 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
