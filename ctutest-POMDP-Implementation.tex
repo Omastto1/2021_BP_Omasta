@@ -1,7 +1,44 @@
 
 \chapter{Implementation}
 
+This chapter is focused on the practical part of the thesis. IN the beginning, we present the assigned tasks connected with this paper. Then, we follow up with the analysis and description of the implemented methods. The sections after that present the benchmark problems and in the end, the validations and benchmarks are presented.
 
+Assignment
+
+The task of this paper is to survey and extend the methods implemented in the JuliaPOMDP library, with the emphasis on the finite horizon ones. To add any further methods or interfaces missing to implement such methods and to maintain the interoperability of the library. To evaluate the performance of the implemented methods and design new test instances, if applicable. And, if applicable, to benchmark the methods against other methods implemented in the library.
+
+
+Design of the JuliaPOMDP library
+
+Before we dive into the description of the tasks accomplished. It is necessary to introduce the JuliaPOMDP library itself.
+The library is based on a set of interfaces gradually built on each other. Such foundations allow the community to create an environment in which the users can almost seamlessly change the functionality of their code. The interface offers uniform methods for defining problems (such as states for getting all states of the problem), structures for storing results in the policies (AlphaVectorPolicy for storing $\alpha$-vectors of POMDPs), passing the parameters to the solver(, or for executing the algorithm selected (calling `solve` is the same no matter the problem or the solver).
+
+Methods defined in JuliaPOMDP
+
+JuliaPOMDP's base method is the interface called POMDPs.jl. This interface defines all methods ranging from defining the model, through storing the result, to defining and executing solvers. On top of these methods, the user can either define a new problem or use already defined one in POMDPModels.jl repository. The user can also define a new solver, or use already defined one. Furthermore, the solvers return their results wrapped into a policy dedicated for it in POMDPPolicies.jl. If implementing a solver, the user would probably use the tools defined in POMDPModelTools.jl as, for example, an `ordered\_vector` which returns the wanted vector in an ordered manner, or distributions defined in the same repository.
+
+ZMINIT ZE JE TO DIKY TOU INTEROPERABLE
+
+The library also contains a lot of solvers for both MDPs and POMDPs. Ranging from Value Iteration up to Monte Carlo Tree Search solver for MDPs (4 total) and from approximate QMDP and other approximate solvers up to SARSOP or Incremental Prunning for POMDPs (12 total). Some of these solvers are reaching optimal solutions and some, usually approximate solvers, only suboptimal results, meaning that some are used more than the others. And they are also evaluated accordingly. However, with toal of 18 solvers (with 2 more reinforcement solvers) are offering more than enough to choose from when solving Infinite Horizon (PO)MDPs. 
+
+Which concludes our analysis of the library.
+
+The Finite Horizon POMDP solvers that are the main task of this thesis, are not yet included in the library. Moreover, the interface deemed essential for such solvers is not completed, as the solvers need to operate over single stages while the current interface does not support such handling.
+
+
+
+
+ZMINIT, ZE PBVI NEFUNGOVALO
+
+
+be, on whose foundations are the other methods implemented.
+
+
+
+
+
+
+implement the others extend the JuliaPOMDP library with the functionality for solving finite horizon POMDPs. 
 \section{solvers}
 
 \subsection{approximate solvers}
