@@ -1,26 +1,23 @@
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 
 
-\part{POMDPs}
-
-\chapter{Theory}
+\chapter{Partially Observable Markov Decision Processes}
 
 
-Up until now, we have dealt with fully observable MDPs. In MDPs, the agent has the perfect knowledge about its position. In practise, however, fully observable environments are very rare. Real-world agents often have only a limited domain of knowledge about its surroundings, making their state uncertain. These environment models are called \textbf{partially observable MDPs} (or POMDPs). With imperfect state information, the functions defined in MDPs are no longer valid and we have to define new, more powerful, methods dealing with stochastic probability distributions, rather than with deterministic ones.
+Up until now, we have dealt with fully observable MDPs. In MDPs, the agent has the perfect knowledge about its position. In practice, however, fully observable environments are scarce. Real-world agents often have only a limited domain of knowledge about their surroundings, making their state uncertain. These environment models are called \textbf{partially observable MDPs} (or POMDPs). With imperfect state information, the functions defined in MDPs are no longer valid, and we have to define new, more powerful methods dealing with stochastic probability distributions rather than with deterministic ones.
 
 \section{POMDP Models}
 
-The POMDPs are based on MDPs and thus some of the model methods remain the same. POMDPs, similar to MDPs, have the transition model $P(s'|s,a)$, states $S$, actions $A(s)$ and reward model $R(s)$ defined. Besides that, the POMDPs also define a new model, which describes the possibility of receiving observations of the agent's surroundings, called the observation function $P(o|s',a)$ and set of observations possible $\Omega$. POMDPs also have the initial distribution $b_0$, but unlike the MDPs, it is defined with a state distribution.
+The POMDPs draw on from MDPs, and thus, some of the model methods remain the same. POMDPs, similar to MDPs, have the transition model $P(s'|s,a)$, states $S$, actions $A(s)$ and reward model $R(s)$ defined. Besides that, the POMDPs also define a new model, which describes the possibility of receiving observations of the agent's surroundings, called the observation function $P(o|s', a)$ and set of observations possible $\Omega$. Unlike MDPs, the POMDPs define the starting position $b_0$ as the initial distribution instead of a deterministic state. 
 
 
 \begin{figure}[h]
 \begin{definition}[\textbf{Partially Observable Markov Decision Process (POMDP)}]\label{def:POMDP}
-POMDPs \cite{Shani2013} are formally defined as a tuple $(S, A, T, R, \Omega, O, b_0)$, where:
+POMDPs \cite{Shani2013} are formally defined as a tuple $\{S, A, T, R, \Omega, O, b_0\}$, where:
 \begin{description}
-  \item[$\bullet$ ] \textit{S, A, T, R} are the same methods as for fully observable \label{MDP}, often called the \textit{underlying} MDP of the POMDP.
+  \item[$\bullet$ ] \textit{S, A, T, R} are the same methods as for fully observable MDPs, often called the \textit{underlying} MDP of the POMDP.
   \item[$\bullet$ ] $\Omega$ is a set of possible observations. For example, in the robot navigation problem, $\Omega$ may consist of all possible immediate wall configurations in a room.
-  \item[$\bullet$ ] \textit{O} is an observation function, where $O(a, s', o) = P(o|s', a})$ is the probability of
-observing \textit{o} given that the agent has executed action \textit{a}, reaching state \textit{$s'$}. \textit{O} can model
+  \item[$\bullet$ ] \textit{O} is an observation function, where $O(a, s', o) = P(o|s', a)$ is the probability of observing \textit{o} given that the agent has executed action \textit{a}, reaching state \textit{$s'$}. \textit{O} can model
 robotic sensor noise, or the stochastic appearance of symptoms given a disease.
   \item[$\bullet$ ] $b_0$ is an initial state distribution.
 \end{description}
@@ -30,21 +27,21 @@ robotic sensor noise, or the stochastic appearance of symptoms given a disease.
 
 % \section{Belief state and its updates}
 
-The initial state distribution $b_0$, and the other state distributions mentioned above are called belief states. The belief states are $|S|$ long vectors describing the probability distribution over all states in POMDPs. The probability of a single state is written as $b(s)$. The update of belief is calculated for each action and observation as the conditional distribution given the sequence of actions executed and observations received so far starting from the initial belief state. The update for each state is then formulated as:
+The initial state distribution $b_0$ and the other state distributions mentioned above are called belief states. The belief states are $|S|$ long vectors describing the probability distribution over all states in POMDPs. The probability of a single state is written as $b(s)$. The update of belief is calculated for each action and observation as the conditional distribution given the sequence of actions executed and observations received so far starting from the initial belief state. We formulate the update of each state as:
 
-\begin{equation} b_o^a(s') = \dfrac{P(o|a, s')}{P(o|b, a)} \sum_{s \in S} P(s'|s, a) b(s),\end{equation}
+\begin{equation} \label{eq:bao} b_o^a(s') = \dfrac{P(o|a, s')}{P(o|b, a)} \sum_{s \in S} P(s'|s, a) b(s),\end{equation}
 
 where $P(o|b, a)$ corresponds to the probability to observe observation \textit{o} after executing action \textit{a} in belief \textit{b}. This probability is calculated as follows:
 
 \begin{equation} P(o|b, a) = \sum_{s' \in S} P(o|a, s')\sum_{s \in S} P(s'|s, a)b(s).\end{equation}
 
-This approach to calculating the normalizing constant is computationally more demanding. However, it allows to skip the computation of the inner sum in cases where the probability is zero.
+This approach to calculating the normalizing constant is computationally more demanding than other approaches. However, it allows skipping the computation of the inner sum in cases where the probability is zero.
 
-The normalizing constant can be replaced with another normalizing constant $c$. In such cases, the impossibility of receiving an observation $o$ after executing action $a$ is obtained at the very end of the belief update.
+If deemed appropriate, we can replace the normalizing constant with another normalizing constant $c$. In such cases, we obtain the impossibility of receiving an observation $o$ after executing action $a$ at the very end of the belief update.
 
 
 \section{Value functions for POMDPs}
-In POMDPs, the value function computes the value for each discrete state. With POMDPs having a continuous space of belief vectors, we need to again move the model method a little further. Instead of computing a policy for a single state, we need to compute utility vectors of length $|S|$ , called \textbf{$\alpha$-vectors}, for belief states. The value of belief state then becomes $\sum_{s \in S} b(s) \alpha_p(s)$, where $\alpha_p(s)$ is the utility of executing a policy p in state s. This linear combination can be interpreted as a hyperplane over the belief space \cite{pbvi}. The optimal action then becomes an action of policy p, whose $\alpha$-vector maximizes the dot product with a given belief:
+In MDPs, the value function computes the value for each discrete state. With POMDPs having a continuous space of belief vectors, we need to alter the model method further. Instead of computing a policy for a single state, we need to compute utility vectors of length $|S|$, called \textbf{$\alpha$-vectors}, for belief states. The value of belief state then becomes $\sum_{s \in S} b(s) \alpha_p(s)$, where $\alpha_p(s)$ is the utility of executing a policy p in state s. This linear combination can be interpreted as a hyperplane over the belief space \cite{pbvi}. The optimal policy in a given belief then becomes an action a, whose $\alpha$-vector maximizes the dot product with a given belief:
 
 \begin{equation} V(b) = V^{p}^{*}(b) = \operatorname*{max}_p b \cdot \alpha_p \end{equation}
 
@@ -63,16 +60,16 @@ Or, in terms of vector operations and operations on sets of vectors \cite{Shani2
 
 In each iteration of the exact value iteration algorithm, the value function is updated across the entire belief space. For each possible action, observation and $\alpha$-vector of old value function, the Eq. \ref{eq:4} computes new $\alpha$-vector, costing $O(|V| \times |A| \times |\Omega| \times |S^2|)$. The alpha vector is then summed with the reward corresponding to a given action in Eq. \ref{eq:3}, cross-summed across the observation space in \ref{eq:2} and unioned across the action space in \ref{eq:1}, adding another $O(|A| \times |S| \times |V|^{|\Omega|}$ to the resulting complexity of a single iteration which is $O(|V| \times |A| \times |\Omega| \times |S^2|) + |A| \times |S| \times |V|^{|\Omega|}$ 
 
- Keeping in mind the exhaustive size of POMDPs' belief space, the algorithm's performance is quickly vanishing with the growing size of the problems
+ Keeping in mind the overwhelming size of POMDPs' belief space, the algorithm's performance quickly vanishes with the growing size of the problems.
 
 
 \section{Point-Based Value Iteration}
 
-Most of the POMDP problems are unlikely to reach most of the points in the belief space. To reduce the complexity of solving POMDPs, approximations are at hand. In the past, approximation algorithms were introduced (\cite{10.2307/171496} suggests creating grid-based belief set, \cite{Hauskrecht00} suggests creating a set of reachable beliefs). These algorithms, however, rely on naive approximations and underperform in the result. For example, creating grid-based belief sets turned out to be inaccurate in the case of sparse grids, or computationally expensive in the case of dense grids.
+Most of the POMDP problems are unlikely to reach most of the points in the belief space. To reduce the complexity of solving POMDPs, approximation algorithms are at hand. In the past, researchers introduced several approximation algorithms (\cite{10.2307/171496} suggests creating a grid-based belief set, \cite{Hauskrecht00} suggests creating a set of reachable beliefs). These algorithms, however, rely on naive approximations and underperform in the result. For example, creating grid-based belief sets turned out to be inaccurate in sparse grids or computationally expensive in the case of dense grids.
 
-Problems described above can be overcome by adopting yet another strategy. Given the most probable belief states, the solver can focus on finding only their corresponding $\alpha$-vectors and thus reduce the computation overhaul. This algorithm is called Point-Based Value Iteration (PBVI).
+Adopting yet another strategy can overcome the problems described above. Given the most probable belief states, we can focus the solver on finding only their corresponding $\alpha$-vectors and thus reduce the computation overhaul. This algorithm is called Point-Based Value Iteration (PBVI).
 
-The PBVI \cite{pbvi} is an anytime algorithm - it starts from an initial belief $b_0$ and iteratively improves its value function and expands its belief space. The belief space $B = \{b_0, b_1, \ldots, b_m\}$ stores the the most probable belief vectors. The value function is updated for each belief vector, but unlike other approximation algorithms, such as grid-based VI, its value function spans over the whole belief space instead of only one belief vector.
+The PBVI \cite{pbvi} is an anytime algorithm - it starts from an initial belief $b_0$ and iteratively improves its value function and expands its belief space. The belief space $B = \{b_0, b_1, \ldots, b_m\}$ stores the the most probable belief vectors. The value function updates each belief vector, but unlike other approximation algorithms, such as grid-based VI, its value function spans over the whole belief space instead of only one belief vector.
 
 \LinesNumbered
 \begin{algorithm}[H]
@@ -85,13 +82,14 @@ $B \xleftarrow{} {b_0}$\\
 \caption{PBVI}
 \end{algorithm}
 
-Thanks to being an anytime algorithm, the solver can be stopped whenever needed, effectively exchanging computation time and solution quality. It is also possible to choose how precise the gap between iterations of value updates will be.
+Thanks to being an anytime algorithm, the solver can be stopped whenever needed, effectively exchanging computation time and solution quality. It is also possible to choose how big the maximum gap between iterations of value updates will be.
+
 
 \subsection{Improve function}
 
 The value function improvement, or backup, is an adjustment of the value update from Eqs. \ref{eq:1} - \ref{eq:4} It maintains only one $\alpha$-vector per belief vector, It also chooses only the best $\alpha$, pruning the dominated vectors twice, at each \textit{argmax} expression, and reducing the complexity of algorithm. The backup can be compactly written as:
 
-\begin{equation} \label{eq:5} backup(V, b) = \operatorname*{argmax}_{\alpha_{a}^{b}:a \in A, \alpha in V} b \cdot \alpha_{a}^{b}\end{equation}
+\begin{equation} \label{eq:5} backup(V, b) = \operatorname*{argmax}_{\alpha_{a}^{b}:a \in A, \alpha \in V} b \cdot \alpha_{a}^{b}\end{equation}
 \begin{equation} \label{eq:6} \alpha_{a}^{b} = r_a + \gamma \sum_{o \in \Omega} \operatorname*{argmax}_{\alpha^{a, o}:\alpha \in V} b \cdot \alpha^{a, o},\end{equation}
 
 where
@@ -101,12 +99,13 @@ where
 \LinesNumbered
 \begin{algorithm}[H]
 \SetAlgoLined
-\Repeat{\textit{V has converged} \tcc{repeat the above until V stops improving for all points in B}}{
+\Repeat{\textit{V has converged} }{
     \ForEach{$b \in B$}{
         $\alpha \xleftarrow{} backup(b, V)$ \tcc{execute a backup operation on all points in B in arbitrary order}\\
         $V \xleftarrow{} V \bigcup \{\alpha\}$
     }
 }
+\tcc{repeat the above until V stops improving for all points in B}
 \caption{PBVI Improve}
 \end{algorithm}
 
@@ -117,11 +116,11 @@ The PBVI algorithm, unlikely the original value update, does not need to cross-s
 |B|\times|A|\times|S|\times|\Omega|)$, instead of $O(|V| \times |A| \times |\Omega| \times |S^2| + |A| \times |S| \times |V|^{|\Omega|})$ in case of exact backup (Eqs. \ref{eq:1} - \ref{eq:4}).
 
 
-The backup runs until the convergence of pair $\alpha$-vectors, or until a predefined number of iterations.
+The backup runs until the convergence of pair $\alpha$-vectors or until a predefined number of iterations.
 
 \subsection{Expand function}
 
-After the completion of function improvement, the algorithm executes the belief space expansion. At this point, the goal is to reduce the error bound as much as possible. This is performed by greedily expanding the belief set with a new furthest belief accessible from each stored belief. The distance function is defined as follows, with $L$ being the chosen distance metric:
+After the completion of function improvement, the algorithm executes the belief space expansion. At this point, the goal is to reduce the error bound as much as possible. The error-bound reduction is performed by greedily expanding the belief set with a new furthest belief accessible from each stored belief. The distance function is defined as follows, with $L$ being the chosen distance metric:
 
 \begin{equation}|b' - B|_L = \operatorname*{min}_{b \in B} |b - b'|_L,\end{equation}
 
@@ -147,24 +146,24 @@ $B_{new} \xleftarrow{} B$
 
 \section{Alternative Point-Based algorithms}
 
-The generic PBVI, while being simple and somewhat clever with its belief set expansion, becomes really cumbersome when solving large POMDP instances. However, we often have to expand to large belief sets. Furthermore, we want to keep the possibility to compute a compact value function. To coop with these circumstances the researchers developed various alternatives and heuristics.
+The generic PBVI, while being simple and somewhat clever with its belief set expansion, becomes cumbersome when solving large POMDP instances. However, we often have to expand to large belief sets. Furthermore, we want to keep the possibility to compute a compact value function. To cope with these circumstances, the researchers developed various alternatives and heuristics.
 
 
 \subsection{PERSEUS \cite{perseus}}
 
-The idea of Perseus comes from the Achilles heel of PBVI. The PBVI is cleverly expanding its belief space with the most probable belief states. However, such approach is significantly demanding. The Perseus algorithm, on the other hand, shows that even running random trials and exploring a large number of belief vectors may be more efficient, if used with clever value updates.
+The idea of Perseus comes from the Achilles heel of PBVI. The PBVI is cleverly expanding its belief space with the most probable belief states. However, such an approach is significantly demanding. On the other hand, the Perseus algorithm shows that even running random trials and exploring a large number of belief vectors may be more efficient if used with clever value updates.
 
 
 \subsection{HSVI \cite{hsvi}}
-The Perseus' algorithm randomization is well suited for small and mid sized problems, but fails in larger ones. This is caused by storing an enormous number of belief vectors. The HSVI algorithm solves this issue by employing simple, yet effective heuristic that helps cut down the gap between the upper and lower bounds on the optimal value function. The HSVI stores the belief vector visits and backs them up in the reversed order.
+The Perseus algorithm randomization is well suited for small and mid-sized problems but fails in larger ones. The intractability is caused by storing an enormous number of belief vectors. The HSVI algorithm solves this issue by employing a straightforward yet effective heuristic that helps cut down the gap between the upper and lower bounds on the optimal value function. The HSVI stores the belief vector visits and backs them up in the reversed order.
 
 
 \subsection{FSVI \cite{fsvi}}
-The FSVI uses another heuristic, it creates new trajectories by using the best action in the underlying MDP. Such policies focus on searching high reward policies, but fail to find the ones in which the information retrieval is essential.
+The FSVI uses another heuristic creating new trajectories by using the best action in the underlying MDP. Such heuristics focus on searching high reward policies but fail to find how information retrieval is essential.
 
 
 \subsection{SARSOP \cite{sarsop}}
-SARSOP, unlike the others, focuses on calculating a cover of optimal belief space, focusing the search into smaller area and removing areas, which will not be visited under sub-optimal policy.
+SARSOP, unlike the others, focuses on calculating a cover of optimal belief space, focusing the search into a smaller area, and removing areas, which the optimal policy will not visit.
 
 
 % \begin{algorithm}[H]

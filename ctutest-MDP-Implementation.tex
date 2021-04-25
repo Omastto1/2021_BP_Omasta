@@ -1,151 +1,151 @@
-\chapter{Implementation}
+% \chapter{Implementation}
 
 
-tady by se asi hodilo to rozdelit na jednotlive casti
+% tady by se asi hodilo to rozdelit na jednotlive casti
 
-\section{FiniteHorizonPOMDPs.jl}
+% \section{FiniteHorizonPOMDPs.jl}
 
-jeste nevim kam presne zaradit interface, protoze to je pro MDP i pro POMDP
+% jeste nevim kam presne zaradit interface, protoze to je pro MDP i pro POMDP
 
-\section{FiniteHorizonDiscreteValueIteration.jl}
-
-
-
+% \section{FiniteHorizonDiscreteValueIteration.jl}
 
 
 
-This chapter presents the solution design, implementation, and shows its benchmark.
-As a goal for this project, we set to implement Finite-Horizon Solver for MDPs only.
 
-\section{Solution Design}
-The package's design is created in line with proposed declarations present in the original repository's README.md and discussed with Zachary Sunberg.
 
-The goal of the project is to create a POMDPs.jl-compatible interface for defining MDPs and POMDPs with finite horizons, and in particular:
-\begin{itemize}
-    \item Provide a way for value-iteration-based algorithms to start at the final-stage and work backward
-    \item Be compatible with generic POMDPs.jl solvers and simulators
-    \item Provide a Finite-Horizon wrapper for Infinite-Horizon MDPs.
-    \item Be compatible with other interface extensions like constrained POMDPs and mixed observability problems.
-\end{itemize}
 
-\subsection{Interface}
-Moreover, the interface should contain or require the implementation of the following methods:
-\begin{itemize}
-    \item \textit{HorizonLength(::Type{<:Union{MDP,POMDP}}) = InfiniteHorizon()}
-    \begin{itemize}
-        \item \textit{FiniteHorizon}
-        \item \textit{InfiniteHorizon}
-    \end{itemize}
-    \item \textit{horizon(m::Union{MDP,POMDP})::Int}
-    \item \textit{stage\_states(m::Union{MDP,POMDP}, t::Int)}
-    \item \textit{stage\_stateindex(m::Union{MDP,POMDP}, t::Int, s)}
-    \item \textit{stage\_actions(m::Union{MDP,POMDP}, t::Int, [s])}
-\end{itemize}
+% This chapter presents the solution design, implementation, and shows its benchmark.
+% As a goal for this project, we set to implement Finite-Horizon Solver for MDPs only.
 
-\subsection{Utilities}
-And also the following utility:
+% \section{Solution Design}
+% The package's design is created in line with proposed declarations present in the original repository's README.md and discussed with Zachary Sunberg.
 
-\begin{itemize}
-    \item \textit{fixhorizon(m::Union{MDP,POMDP}, T::Int) creates one of}
-    \begin{itemize}
-        \item \textit{FiniteHorizonMDP{S, A} <: MDP{Tuple{S,Int}, A}}
-        \item \textit{FiniteHorizonPOMDP{S, A, O} <: POMDP{Tuple{S,Int}, A, O}}
-    \end{itemize}
-\end{itemize}
+% The goal of the project is to create a POMDPs.jl-compatible interface for defining MDPs and POMDPs with finite horizons, and in particular:
+% \begin{itemize}
+%     \item Provide a way for value-iteration-based algorithms to start at the final-stage and work backward
+%     \item Be compatible with generic POMDPs.jl solvers and simulators
+%     \item Provide a Finite-Horizon wrapper for Infinite-Horizon MDPs.
+%     \item Be compatible with other interface extensions like constrained POMDPs and mixed observability problems.
+% \end{itemize}
 
-\section{Implementation}
+% \subsection{Interface}
+% Moreover, the interface should contain or require the implementation of the following methods:
+% \begin{itemize}
+%     \item \textit{HorizonLength(::Type{<:Union{MDP,POMDP}}) = InfiniteHorizon()}
+%     \begin{itemize}
+%         \item \textit{FiniteHorizon}
+%         \item \textit{InfiniteHorizon}
+%     \end{itemize}
+%     \item \textit{horizon(m::Union{MDP,POMDP})::Int}
+%     \item \textit{stage\_states(m::Union{MDP,POMDP}, t::Int)}
+%     \item \textit{stage\_stateindex(m::Union{MDP,POMDP}, t::Int, s)}
+%     \item \textit{stage\_actions(m::Union{MDP,POMDP}, t::Int, [s])}
+% \end{itemize}
 
-The implementation is at \cite{FHPOMDP} or APENDIX.
+% \subsection{Utilities}
+% And also the following utility:
 
-The Finite Horizon algorithm evaluates a given MDP problem using Value Iteration.  
+% \begin{itemize}
+%     \item \textit{fixhorizon(m::Union{MDP,POMDP}, T::Int) creates one of}
+%     \begin{itemize}
+%         \item \textit{FiniteHorizonMDP{S, A} <: MDP{Tuple{S,Int}, A}}
+%         \item \textit{FiniteHorizonPOMDP{S, A, O} <: POMDP{Tuple{S,Int}, A, O}}
+%     \end{itemize}
+% \end{itemize}
 
-\subsection{Solution approach}
+% \section{Implementation}
 
- The Current solution consists of a solver \textit{mysolve(mdp)} iterating and evaluating epochs and \textit{FiniteHorizonPolicy} structure storing its results (value function matrix, matrix of Qs, policy, map of actions, MDP instance). 
+% The implementation is at \cite{FHPOMDP} or APENDIX.
+
+% The Finite Horizon algorithm evaluates a given MDP problem using Value Iteration.  
+
+% \subsection{Solution approach}
+
+%  The Current solution consists of a solver \textit{mysolve(mdp)} iterating and evaluating epochs and \textit{FiniteHorizonPolicy} structure storing its results (value function matrix, matrix of Qs, policy, map of actions, MDP instance). 
  
-%  \textbf{Finite-Horizon Policy}
-% \begin{description}[1cm]
-%     \item $Q$ 
-%     \item $V$  
-%     \item $policy$ 
-%     \item $actions$ 
-%     \item $include\:Q$ 
-%     \item $MDP$ 
-% \end{description}
+% %  \textbf{Finite-Horizon Policy}
+% % \begin{description}[1cm]
+% %     \item $Q$ 
+% %     \item $V$  
+% %     \item $policy$ 
+% %     \item $actions$ 
+% %     \item $include\:Q$ 
+% %     \item $MDP$ 
+% % \end{description}
  
- \textit{Mysolve} takes the Finite-Horizon MDP as input, initializes policy structure and value function matrix, and iterates from \textit{$(maximum\_horizon-1)^{th}$} to \textit{$1^{st}$} epoch. Each epoch is then evaluated using a value iteration algorithm, which is initialized with the following epoch's value function matrix. Results of each epoch are stored in \textit{FiniteHorizonPolicy}.
+%  \textit{Mysolve} takes the Finite-Horizon MDP as input, initializes policy structure and value function matrix, and iterates from \textit{$(maximum\_horizon-1)^{th}$} to \textit{$1^{st}$} epoch. Each epoch is then evaluated using a value iteration algorithm, which is initialized with the following epoch's value function matrix. Results of each epoch are stored in \textit{FiniteHorizonPolicy}.
  
- \LinesNumbered
-\begin{algorithm}
-\SetAlgoLined
-initialize $FiniteHorizonPolicy$ \\
-initialize $V$ \\
-\For{$epoch = horizon - 1;\ epoch > 0;\ epoch = epoch - 1$}{
-    set \textit{epoch} global \\
-    run 1 iteration of \textit{value\_iteration(MDP, epoch, V)} \\
-    update \textit{FiniteHorizonPolicy} \\
-}
-return \textit{FiniteHorizonPolicy}
-\caption{Finite-Horizon MDP Solver mysolve}
-\end{algorithm}
+%  \LinesNumbered
+% \begin{algorithm}
+% \SetAlgoLined
+% initialize $FiniteHorizonPolicy$ \\
+% initialize $V$ \\
+% \For{$epoch = horizon - 1;\ epoch > 0;\ epoch = epoch - 1$}{
+%     set \textit{epoch} global \\
+%     run 1 iteration of \textit{value\_iteration(MDP, epoch, V)} \\
+%     update \textit{FiniteHorizonPolicy} \\
+% }
+% return \textit{FiniteHorizonPolicy}
+% \caption{Finite-Horizon MDP Solver mysolve}
+% \end{algorithm}
 
-In the current version of the algorithm, we have to set the epoch global to pass it to interface functions. The next planned version will no longer contain the global variable.
+% In the current version of the algorithm, we have to set the epoch global to pass it to interface functions. The next planned version will no longer contain the global variable.
 
-\subsection{Defining MDP}
+% \subsection{Defining MDP}
 
-To define the MDP instance, we have to define the methods declared in \textit{JuliaPOMDP/POMDPs.jl} \cite{JMLR:v18:16-300} or from another library's package. The Finite-Horizon MDP Solver further requires: \textit{stage\_states}, which returns states of a given epoch, \textit{stage\_actions}, which return actions of a given epoch, and \textit{stage\_stateindex}, which return indices of a given state for a given epoch. For example of properly defined MDP see directory \textit{/test/instances}.
+% To define the MDP instance, we have to define the methods declared in \textit{JuliaPOMDP/POMDPs.jl} \cite{JMLR:v18:16-300} or from another library's package. The Finite-Horizon MDP Solver further requires: \textit{stage\_states}, which returns states of a given epoch, \textit{stage\_actions}, which return actions of a given epoch, and \textit{stage\_stateindex}, which return indices of a given state for a given epoch. For example of properly defined MDP see directory \textit{/test/instances}.
  
 
-\subsection{Future plan}
+% \subsection{Future plan}
 
-The following releases' goals are to improve the performance, implement Infinite-Horizon MDP wrapper, and implement Finite-Horizon solver for POMDPs.
+% The following releases' goals are to improve the performance, implement Infinite-Horizon MDP wrapper, and implement Finite-Horizon solver for POMDPs.
 
 
-\section{Benchmark}
-To prove the efficiency of implemented Finite-Horizon solver, we present a benchmark of Finite-Horizon MDP instance solved by
-\begin{itemize}
-    \item Value Iteration implemented in JuliaPOMDP/DiscreteValueIteration.jl
-    \item Finite-Horizon Value Iteration solver implemented in this project in JuliaPOMDP/FiniteHorizonPOMDPs.jl package.
-\end{itemize}
+% \section{Benchmark}
+% To prove the efficiency of implemented Finite-Horizon solver, we present a benchmark of Finite-Horizon MDP instance solved by
+% \begin{itemize}
+%     \item Value Iteration implemented in JuliaPOMDP/DiscreteValueIteration.jl
+%     \item Finite-Horizon Value Iteration solver implemented in this project in JuliaPOMDP/FiniteHorizonPOMDPs.jl package.
+% \end{itemize}
 
-\subsection{MDP Instances}
+% \subsection{MDP Instances}
 
-To compare the results obtained, the instance has \textit{num\_of\_states * finite\_horizon} states for both solvers.
+% To compare the results obtained, the instance has \textit{num\_of\_states * finite\_horizon} states for both solvers.
 
-The instances were defined as 1D GridWorld problem with goal states on its right and left ends. The possible actions are \textit{move to left} and \textit{move to right}. The cost of such a move is 1, and the reward for moving to the goal is -10. Goals are terminal states and can not be left. The discount factor is one and the noise 0.6.
+% The instances were defined as 1D GridWorld problem with goal states on its right and left ends. The possible actions are \textit{move to left} and \textit{move to right}. The cost of such a move is 1, and the reward for moving to the goal is -10. Goals are terminal states and can not be left. The discount factor is one and the noise 0.6.
 
-The benchmark were be performed on 3 different instance sizes:
-\begin{itemize}
-    \item \textbf{Instance 1} $states = 999, horizon = 500$,
-    \item \textbf{Instance 2} $states = 99, horizon = 50$, and
-    \item \textbf{Instance 3} $states = 9, horizon = 5$.
-\end{itemize}
+% The benchmark were be performed on 3 different instance sizes:
+% \begin{itemize}
+%     \item \textbf{Instance 1} $states = 999, horizon = 500$,
+%     \item \textbf{Instance 2} $states = 99, horizon = 50$, and
+%     \item \textbf{Instance 3} $states = 9, horizon = 5$.
+% \end{itemize}
 
-\subsection{Comparison}
+% \subsection{Comparison}
 
-The benchmark resulted in following:
+% The benchmark resulted in following:
 
-\subsubsection{Instance 1}
+% \subsubsection{Instance 1}
 
-\begin{itemize}
-    \item \textbf{Value Iteration} 183.729947 seconds (3.48 G allocations: 244.793 GiB),
-    \item \textbf{Finite-Horizon Value Iteration}   0.566122 seconds (7.17 M allocations: 579.764 MiB)
-\end{itemize}
+% \begin{itemize}
+%     \item \textbf{Value Iteration} 183.729947 seconds (3.48 G allocations: 244.793 GiB),
+%     \item \textbf{Finite-Horizon Value Iteration}   0.566122 seconds (7.17 M allocations: 579.764 MiB)
+% \end{itemize}
 
-\subsubsection{Instance 2}
+% \subsubsection{Instance 2}
 
-\begin{itemize}
-    \item \textbf{Value Iteration} 1.082094 seconds (4.41 M allocations: 292.613 MiB)
-    \item \textbf{Finite-Horizon Value Iteration}   0.199167 seconds (241.17 k allocations: 14.231 MiB)
-\end{itemize}
+% \begin{itemize}
+%     \item \textbf{Value Iteration} 1.082094 seconds (4.41 M allocations: 292.613 MiB)
+%     \item \textbf{Finite-Horizon Value Iteration}   0.199167 seconds (241.17 k allocations: 14.231 MiB)
+% \end{itemize}
 
-\subsubsection{Instance 3}
+% \subsubsection{Instance 3}
 
-\begin{itemize}
-    \item \textbf{Value Iteration} 0.643639 seconds (1.08 M allocations: 51.450 MiB)
-    \item \textbf{Finite-Horizon Value Iteration}   0.200691 seconds (172.53 k allocations: 8.653 MiB)
-\end{itemize}  
+% \begin{itemize}
+%     \item \textbf{Value Iteration} 0.643639 seconds (1.08 M allocations: 51.450 MiB)
+%     \item \textbf{Finite-Horizon Value Iteration}   0.200691 seconds (172.53 k allocations: 8.653 MiB)
+% \end{itemize}  
 
-We tested each benchmark's results to be the same.
+% We tested each benchmark's results to be the same.
 
-The benchmarks show that the acyclic graphs with the optimal backup policy result in optimal policy and perform precisely both time-wise and memory-wise. We expect the results to be even better in the following versions.
+% The benchmarks show that the acyclic graphs with the optimal backup policy result in optimal policy and perform precisely both time-wise and memory-wise. We expect the results to be even better in the following versions.

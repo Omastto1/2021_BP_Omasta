@@ -1,0 +1,222 @@
+
+
+
+\chapter{Finite Horizon POMDPs}
+
+ In contradiction to Finite Horizon MDPs, the Finite Horizon POMDPs do not offer a one-pass optimal solution. Furthermore, it causes additional memory and performance requirements.
+ Causing additional memory and performance requirements does not mean that it is necessarily a flawed concept. In the following chapter, we will explain why the Finite Horizon POMDPs are actually beneficial, why we need to use appropriate methods or develop new ones designed to solve finite horizon problems instead of the infinite horizon ones that introduce the state-of-the-art algorithm for solving Finite Horizon POMDPs. Besides, we will introduce possible heuristics that the algorithm can employ.
+ 
+ In the following chapter, we will mainly draw on from \cite{Walraven19}.
+ 
+ 
+ \section{Finite Horizon Problems}
+ The real-world problems span from non-stop operational agents to the ones that are time-limited. Say, an elevator focusing on short-term rewards from personnel transport in the former case and the electric vehicle charging provider focusing on day-to-day forecasts in the latter case.
+ 
+ The Finite Horizon POMDPs are defined in line with Definition \ref{def:POMDP}, but their time-span is limited by the horizon $h$ or $t_{max}$. We call each specific time moment a $stage$. Distinguishing between stages opens up the possibility of different state spaces in various stages. Note that the transition is defined as a mapping from state $s$ in stage $t$ and action $a$ to state $s'$ in stage $t+1$. The observation function $\Omega$, observation set $O$, and reward function $R$ are typically extended with the stage information as well.
+ 
+In this chapter, we consider the discount $\gamma$ = 1, as we focus on problems, which do not include the discount factor. In such cases, we want to obtain the policy that maximizes the expected sum of rewards:
+
+\begin{equation}
+    E \left[ \sum_{t=1}^{h}r_t \right],
+\end{equation}
+
+where $t=1$ is the first time step and $h$ stands for the horizon number, meaning there are $h$ steps total.
+In finite horizon problems, we store different value functions $V^{\pi}(t, b)$ and policies $\pi(t, b)$ for each time step, mapping both time and state to the optimal action and its value. The value function computes the expected sum of rewards the agent obtains when following the policy from stage $t$ and belief $b$ to stage $h$. We define the formula as follows:
+
+
+% TODO: \right] se nechce vypsat
+\begin{equation}
+    V^{\pi^*}(t, b) = \begin{cases} \begin{aligned}
+        \operatorname{max}_{a \in A} \left[ {\sum_{s \in S} R(s, a)b(s) + \sum_{o \in O} & P(o|b, a) V^{\pi ^ *}(t+1, b^a_o) }\right]  && t \leq h \\
+        & 0 && t > h \\
+        \end{aligned} \end{cases}
+    ,
+\end{equation}
+
+where $b^a_o$ is the belief updated with observation $o$ obtained after executing action $a$ defined in Eq. \ref{eq:bao}.
+
+The optimal policy ${\pi}^*$ corresponding to the optimal value function is defined as:
+
+\begin{equation}
+    {\pi}^*(t, b) = \operatorname{argmax}_{a \in A} \left[ {\sum_{s \in S} R(s, a)b(s) + \sum_{o \in O} & P(o|b, a) V^{\pi ^ *}(t+1, b^a_o) }\right].
+\end{equation} 
+
+For time steps from \textit{1} to $h$ the policy returns optimal action corresponding to optimal value-function in time $t$ and belief $b$. 
+
+\section{Limitations of POMDP Algorithms in Finite Horizon Settings}
+
+The existing POMDP solvers work with discounting reward, but it turns out that they can not easily generalize to the finite horizon setting without discounting. This section will discuss the approaches that could be leveraged in Finite Horizon POMDP solving and why the existing solvers can not apply the discount factor $\gamma = 1$.
+
+\subsection{Solution Strategies for Finite Horizon Problems}
+
+The first approach solves the POMDP as if it is a fully observable MDP. This model change is possible thanks to the finite number of reachable beliefs of POMDP. Thanks to that, we can treat each belief as an MDP state and solve it with MDP solvers. This approach, however, creates up to $(|A||O|)^h$ beliefs and often becomes intractable.
+
+The second approach assumes solving the Finite Horizon POMDP as if it is an infinite horizon one. In this approach, we can safely assume discounting. However, because of wrongly assuming the infinite horizon, the policy does not have the information that its execution is terminated after a finite number of steps, meaning that it focuses on obtaining the unreachable reward obtainable even after the maximum number of steps. The second disadvantage is that the policy focuses on early reward because of the discounting, even if there is a larger reward later on. The agent, however, does not obtain the larger reward because its value is negatively decreased by discounting and, as such, becomes lower than the early small reward.
+
+The third approach supposes that the Finite Horizon POMDP states are reachable in all stages with a terminal state after the horizon stage, resulting in $|S| \times h + 1$ states. This approach is inefficient as it increases the number of beliefs and the other solution representation as $\alpha$-vectors, resulting in an undesired increase in both performance and memory requirements.
+
+% TODO TADY MUZU DODELAT DALSI APPROACHes
+
+
+
+\subsection{Discarding the Discount Factor in Infinite Horizon Algorithms}
+
+
+In the text above, we discussed possible approaches to solving Finite Horizon POMDPs without discounting and why they are often intractable or have other undesirable effects. In the following lines, we will describe why the solvers introduced in the section on Infinite Horizon POMDPs can not be used in the Finite Horizon setting with discount factor $\gamma = 1$. Besides, we discuss their optimality and whether they compute bounds on their results. The optimality of the result refers to the policy starting from a known initial belief. The results may be suboptimal if starting from the other than the initial belief. We will start from the basic solvers and work our way to the most advanced heuristics presented in this work.
+
+Exact Value Iteration can be used with the discount factor $\gamma = 1$. It computes the optimal solution for any initial belief. However, it is intractable for problems with large state spaces.
+
+Point-Based Value Iteration does not suffer from computing the value function for the whole belief space. It incrementally expands its belief space, and it can evaluate its methods without using the discounting factor. Unfortunately, the worst-case error bound assumes a discount $\gamma < 1$, which opposes our requirements. The number of beliefs in PBVI  can still become large, and its improvements showed better results than their foundation.
+
+Perseus algorithm also requires the lower bound to be initialized with $\gamma < 1$. It does not keep track of the upper bound. It is randomized and, in particular, does not provide any guarantee on performance and optimality.
+
+Both SARSOP and HSVI incrementally expand their set of belief points, and their backup and upper bound update are well-defined for $\gamma = 1$. They produce the upper bound on the optimal value function and thus guarantee the optimality in the limit. However, their lower bound initialization, as in the preceding algorithm, requires a discount $\gamma < 1$. Thus, to employ both algorithms in the finite horizon environment, we need to adapt them.
+
+All algorithms presented in the previous chapter as infinite horizon solvers lack at least one of the three declared properties. The algorithm we will present in the next section meets all the required properties. It also draws on the well-performing properties of the Finite Horizon POMDP solvers. Furthermore, the algorithm converges to optimality, computes both bounds, and does not require problems to contain discounting.
+
+\subsection{FiVI: Finite Horizon Point-Based Value Iteration}
+
+
+
+
+
+\newpage
+
+\LinesNumbered
+\begin{algorithm}[H]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    
+    \Input{POMDP M, precision $\rho$, time limit $\tau$}
+    \Output{sets $\Gamma_t$ for each time step $t$, upper bound $v_u$}
+    \SetAlgoLined
+    $\Gamma_t \xleftarrow{} \emptyset\  \forall t $ \\
+    $\textit{B}_t \xleftarrow{} \emptyset\  \forall t $ \\
+    $ r_a \xleftarrow{} (R(s_1, a), R(s_2, a), \dots, R(s_{|S|}, a))\ \forall a $ \\
+    add corner beliefs to \textit{B}$_t$ with upper bound $\infty\ (\forall t) $ \\
+    $ \tau' \xleftarrow{} 0, \delta \xleftarrow{} 0 $ \\
+    
+    \SetKwRepeat{Do}{do}{while}
+    \Do{$\tau' < \tau \wedge v_u - v_l > g_a$}{
+        $\delta \xleftarrow{} \delta + 1$ \\
+        expand(M, $\{\Gamma_1, \dots, \Gamma_h\}, \{B_1, \dots, B_h \}$, r) \\
+        \For{t = h, h - 1, \dots, 1}{
+            $\Gamma_t \xleftarrow{} \emptyset$ \\
+            \For{$(b, \bar{v}) \in B_t$}{
+                $\alpha \xleftarrow{} backup(b, t) $ \\
+                $ \Gamma_t \xleftarrow{} \Gamma_t \cup \{\alpha\} $ \\ 
+            } 
+            \For{$(b, \bar{v}) \in B_t$}{
+                % $\bar{v} \xleftarrow{} Update Upper Bound$\\
+                $\bar{v} \xleftarrow{} -\infty$ \\
+                \For{$a \in A$}{
+                    $v \xleftarrow{} r_a \cdot b$ \\
+                    \If{t < h}{
+                        \For{$o \in O$}{
+                            \If{$P(o|b, a) > 0$}{
+                                $ v \xleftarrow{} v + P(o|b, a) \cdot $ UB$(b^a_o, B_{t+1}) $
+                            }
+                        } 
+                    }
+                    $ \bar{v} \xleftarrow{} \operatorname{max}(\bar{v}, v) $ \\
+                }
+            }
+        }
+        
+        $ v_l \xleftarrow{} \operatorname{max}_{\alpha \in \Gamma_1} \alpha \cdot b_1$ \\
+        $ v_u \xleftarrow{} $ upper bound $\bar{v}$ associated with $(b_1, \bar{v}) \in B_1 $ \\
+        $ g_a \xleftarrow{} 10^{\lceil \operatorname{log}_{10}(\operatorname{max}(|v_l|,|v_u|))\rceil - \rho}$ \\
+        $ \tau' \xleftarrow{} $ elapsed time after the start of the algorithm \\
+    }
+    \textbf{return} ($\{\Gamma_1, \dots, \Gamma_h\}, v_u$) \\
+
+
+\caption{Finite Horizon Point-Based Value Iteration (FiVI)}
+\end{algorithm}
+
+
+% \LinesNumbered
+% \begin{algorithm}[H]
+   
+%     \SetAlgoLined
+%     $\bar{v} \xleftarrow{} -\infty$ \\
+%     \For{$a \in A$}{
+%         $v \xleftarrow{} r_a \cdot b$ \\
+%         \If{t < h}{
+%             \For{$o \in O$}{
+%                 \If{$P(o|b, a) > 0$}{
+%                     $ v \xleftarrow{} v + P(o|b, a) \cdot $ UB$(b^a_o, B_{t+1}) $
+%                 }
+%             } 
+%         }
+%         $ \bar{v} \xleftarrow{} \operatorname{max}(\bar{v}, v) $ \\
+%     }
+%     \textbf{return} $\bar{v}$ \\
+
+
+% \caption{Update Upper Bound}
+% \end{algorithm}
+
+
+
+\LinesNumbered
+\begin{algorithm}[H]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    
+    \Input{belief $b'$, set $B$ containing belief-bound pairs}
+    \Output{upper bound corresponding to belief $b'$}
+   
+    \SetAlgoLined
+    \For{$(b, \bar{v}) \in B \setminus \{(e_s, \cdot)\ |\ s \in S$}{
+        $f(b) \xleftarrow{} \bar{v} - \sum_{s \in S} b(s) B(e_s)  $ \\
+        $c(b) \xleftarrow{} \operatorname{min}_{s \in S} b'(s)\ /\ b(s) $ \\
+    }
+    $ b^* \xleftarrow{} \operatorname{argmin}_{\{b|(b, \bar{v} \in B \setminus \{e_s\ |\ s \in S\}\}} c(b) f(b) $ \\
+    \textbf{return} $c(b^*) f(b^*) + \sum_{s \in S} b'(s) B(e_s) $ \\
+
+
+\caption{Sawtooth approximation (UB)}
+\end{algorithm}
+
+
+
+\LinesNumbered
+\begin{algorithm}[H]
+    \SetKwInOut{Input}{Input}
+    
+    \Input{M, $\{\Gamma_1, \dots, \Gamma_h\}, \{B_1, \dots, B_h \}$, r}
+   
+    \SetAlgoLined
+    $ b \xleftarrow{} b_1$ \\
+    \For{t = h, h - 1, \dots, 1}{
+        $ a \xleftarrow{} \operatorname{argmax}_{a \in A} \{r_a \cdot b + \sum_{\{o \in O |\ P(o|b, a) > 0\}} P(o| b, a) \cdot$ UB$(b^a_o, B_{t+1})\}$ \\
+        $ o \xleftarrow{} \operatorname{argmax}_{\{o \in O\ |\ P(o|b, a) > 0\}} \{$  UB$(b^a_o, B_{t+1}) - \operatorname{max}_{\alpha \in \Gamma_{t+1}} \alpha \cdot b^a_o \}$ \\
+        $ B_{t+1} \xleftarrow{} B_{t+1} \cup \{(b^a_o, \infty)\} $ \\
+        $ b \xleftarrow{} b^a_o $\\ 
+    }
+\caption{Belief expansion (expand)}
+\end{algorithm}
+
+
+
+
+
+
+% \documentclass[a4paper, 11pt]{article}
+% \usepackage[norelsize, linesnumbered, ruled, lined, boxed, commentsnumbered]{algorithm2e}
+
+% \begin{document}
+% \begin{algorithm}[H]
+%  \SetAlgoLined
+%  \LinesNumbered
+%  \SetKwInOut{Input}{Input}
+%  \Input{$Graph\ G(V, E)$}
+%  \SetKwProg{Function}{function}{}{end}
+%  \SetKwRepeat{Do}{do}{while}
+%  \Function{function(param: int) : int}{
+%      \Do{done = false}{ something }
+%  }
+%  \caption{Algorithm}
+% \end{algorithm}
+% \end{document}
