@@ -74,13 +74,90 @@ Both SARSOP and HSVI incrementally expand their set of belief points, and their 
 
 All algorithms presented in the previous chapter as infinite horizon solvers lack at least one of the three declared properties. The algorithm we will present in the next section meets all the required properties. It also draws on the well-performing properties of the Finite Horizon POMDP solvers. Furthermore, the algorithm converges to optimality, computes both bounds, and does not require problems to contain discounting.
 
-\subsection{FiVI: Finite Horizon Point-Based Value Iteration}
+\section{FiVI: Finite Horizon Point-Based Value Iteration}
+
+%  TODO DOPSAT INTRODUCTION
+
+TBC
+
+\subsection{Time-Dependent Value Functions and Backups}
+The standard way of computing value functions in point-based value iteration algorithms is to run a value function update similar to the one defined by Eqs. \ref{eq:5}, \ref{eq:6} and \ref{eq:7}. In FiVI, we have to extend the value update with the non-stationary staged environment elements. The algorithm utilizes staged value functions $V_t$ ranging from stage 1 to the horizon stage. Each value function $V_t$ is represented by a set of $\alpha$-vectors $\Gamma_t$.
+
+The vectors constituting to a value function are defined by a time-dependent backup function:
+
+\begin{equation}
+    \Gamma_t = \bigcup_{(b, \bar{v}) \in B_t} backup(b, t)
+\end{equation}
+
+The FiVI needs to keep track of beliefs' upper bounds $\bar{v}$ to converge. The backup(b, t) exploits the knowledge of next step value function $\Gamma_{t + 1}$ to compute $\alpha$-vectors of $\Gamma_t$. The FiVI defines the time-dependent backup(b, t) operator as following:
+
+\begin{equation} backup(b, t) = \operatorname*{argmax}_{\{z_{b, a, t}\}_{a\in A}} b \cdot z_{b, a, t}, \end{equation}
+
+where 
+
+\begin{equation} z_{b, a, t} = \begin{cases} \begin{aligned}
+        r_a + \sum_{o \in \Omega} \operatorname*{argmax}_{\{z^{k, t+1}_{a, o}\}_k}&\ b \cdot z^{k, t+1}_{a, o} && t < h \\
+        &r_a && t = h \\
+        \end{aligned}\end{cases},\end{equation}
+
+and $z^{k,t}_{a,o}$ denotes the back-projection of vector $\alpha^{k,t} \in \Gamma_t$:
+
+\begin{equation} z^{k,t}_{a,o}(s) = \sum_{s' \in S} P(o|a, s') P(s'| s, a) \alpha^{k, t} (s')\ \forall s.\end{equation}
+
+The vector $r_a$ represents the immediate reward vector for action $a$. We also assume that the backup has access to all vector sets and the reward vectors $r_a$.
+
+\subsection{Time-Dependent Value Upper Bounds and Bound Updates}
+Computing the upper bound, typical for Point-based Value Iteration algorithms, enables the solution quality assessment. The FiVI algorithm stores the upper bound value as $\bar{v}$ in the pairs of $(b, \bar{v}$ kept in belief sets \textit{B}$_t$. Generally, we compute the upper bound values $\bar{v}$ by employing linear programming interpolation. However, this approach is computationally expensive, and the researchers introduced the sawtooth approximation in \cite{Hauskrecht_2000}.
+
+\LinesNumbered
+\begin{algorithm}[H]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    
+    \Input{belief $b'$, set $B$ containing belief-bound pairs}
+    \Output{upper bound corresponding to belief $b'$}
+   
+    \SetAlgoLined
+    \For{$(b, \bar{v}) \in B \setminus \{(e_s, \cdot)\ |\ s \in S$}{
+        $f(b) \xleftarrow{} \bar{v} - \sum_{s \in S} b(s) B(e_s)  $ \\
+        $c(b) \xleftarrow{} \operatorname{min}_{s \in S} b'(s)\ /\ b(s) $ \\
+    }
+    $ b^* \xleftarrow{} \operatorname{argmin}_{\{b|(b, \bar{v} \in B \setminus \{e_s\ |\ s \in S\}\}} c(b) f(b) $ \\
+    \textbf{return} $c(b^*) f(b^*) + \sum_{s \in S} b'(s) B(e_s) $ \\
 
 
+\caption{Sawtooth approximation (UB)}
+\end{algorithm}
+
+The sawtooth algorithm simplifies the upper bound update by imposing the weights $c_b$ only to so-called corner beliefs. The corner belief marked $e(s)$ stands for the belief that has a deterministic distribution over a given state $s$. The algorithm takes a belief $b'$, and a belief set $B$ and returns the upper bound interpolation for $b'$. The $B(e_s)$ notation denotes the upper bound of $e(s)$ in the belief set $B$.
+
+In the finite horizon settings we update the upper bound value of the belief $b$ in time $t < h$ as follows:
+
+\begin{equation}
+    \operatorname{max}_{a \in A} \sum_{s \in S} R(s, a)b(s) + \sum_{o \in I} P(o|b, a) UB(b^a_o, B_{t+1}),
+\end{equation}
+
+where we interpolate based on the belief set $B_{t+1}$ from the next stage. In the horizon stage we compute only $\operatorname{max}_{a \in A} \sum_{s \in S} R(s, a)b(s)$ as the upper bound value of the sink state is zero.
 
 
+\subsection{Algorithm Description of FiVI}
 
-\newpage
+The FiVI algorithm is an iterative algorithm that takes the POMDP, required precision, and time limit as the inputs and outputs the vector of $\alpha$-vector sets $\Gamma_t$ and the upper bound of the initial belief. 
+
+At the very beginning, the algorithm initiates its model representations of belief sets, $\alpha$-vectors, the reward vector of each action, the variables storing the number of iterations and time elapsed (lines 1 - 5).
+
+Following lines 6 - 34, execute the body of the algorithm. The do-while loop consists of 3 main parts - belief expansion, belief backup, and belief upper bound update.
+
+The belief expansion on line 8 finds new beliefs $B_t$ to shrink the gap between the upper and the lower bound. 
+
+The lines 9 - 29 are iterating over all non-terminal stages backwards, computing belief backup $\Gamma_t \xleftarrow{} \bigcup_{(b, \bar{v}) \in B_t} backup(b, t)$  on lines 11 - 14 and belief upper bound value on lines 15 - 27 of stage $T$ with the model representations of stage $t + 1$.
+
+An iteration ends with a check of termination conditions - the maximum gap $g_a$ and minimal time elapsed $\tau$. The difference between the upper bound $v_u$ of initial belief $b_1$ and the lower bound $v_u$ denotes the current gap. The algorithm stops if the gap is at most one unit at the $\rho$-th significant digit or if a time limit $\tau$ has been exceeded.
+
+The FiVI algorithm returns the vector of $\alpha$-vector sets $\{\Gamma_1, \dots, \Gamma_h\}$ denoting the lower bound and the upper bound $v_u$ of the initial belief $b_1$. The gap implicitly defines a guarantee on the quality of computed solution \cite{Walraven19}.
+
+
+% \newpage
 
 \LinesNumbered
 \begin{algorithm}[H]
@@ -135,6 +212,61 @@ All algorithms presented in the previous chapter as infinite horizon solvers lac
 \end{algorithm}
 
 
+
+\subsection{Belief Points and Convergence of the Algorithm}
+
+The optimality and speed of convergence of FiVI and Point-Based algorithms heavily depends on the quality of expanded belief backup executions. The algorithm then can go in two directions. Either to randomly select new beliefs or to steer the new beliefs into space, the optimal policy would go as well. However, we do not know the optimal policy beforehand.
+
+The FiVI algorithm uses a heuristic procedure similar to HSVI, SARSOP, or GapMIN to explore the promising areas. 
+
+The algorithm chooses the action and observation that lowers the gap as much as possible, effectively reducing the overall gap. We will motivate this by the term $U(t, b, a) - V(t, b, a)$ which shows the difference between the potential upper bound $U(t, b, a)$ of the belief $b$ in the stage $t$ after executing action $a$ and its expected value function $V(t, b, a)$. The value function is, by definition, maximizing its value and the upper bound minimizing, reducing the resulting gap, and improving the quality of the result.
+
+The expected value function for belief $b$ in stage $t$ after executing the action $a$ is:
+
+\begin{equation}
+    V(t, b, a) = \sum_{s \in S} R(s, a) b(s) + \sum_{o \in O} P(o|b, a) V(t + 1, b^a_o),
+\end{equation}
+
+and the potential upper bound:
+
+\begin{equation}
+    U(t, b, a) = \sum_{s \in S} R(s, a) b(s) + \sum_{o \in O} P(o|b, a) UB(b^a_o, B_{t+1}).
+\end{equation}
+
+After choosing the best action a, the algorithm chooses the observation leading to a belief with a maximum gap in stage $t + 1$.
+
+All expanded beliefs with stage $t > 1$ contribute to the final bounds and the gap associated with the initial belief $b_1$.
+
+\begin{equation}
+    \operatorname{argmax}_{\{o \in O\ |\ P(o|b, a) > 0\}} \{UB(b^a_o, B_{t + 1}) - \operatorname{max}_{\alpha \in \Gamma_{t + 1}} \alpha \dot b^a_o \}.
+\end{equation}
+
+The expand algorithm expands at most one belief for each stage $t$. It adds the resulting belief to the next stage belief set $B_{t + 1}$ as the new belief comes from the stage $t$ belief $b$. The procedure follows the rules outlined in the lines above, starting from the initial belief. We do not have to consider the stage $t = h$ as we are not interested in the terminal beliefs.
+
+\LinesNumbered
+\begin{algorithm}[H]
+    \SetKwInOut{Input}{Input}
+    
+    \Input{M, $\{\Gamma_1, \dots, \Gamma_h\}, \{B_1, \dots, B_h \}$, r}
+   
+    \SetAlgoLined
+    $ b \xleftarrow{} b_1$ \\
+    \For{t = h, h - 1, \dots, 1}{
+        $ a \xleftarrow{} \operatorname{argmax}_{a \in A} \{r_a \cdot b + \sum_{\{o \in O |\ P(o|b, a) > 0\}} P(o| b, a) \cdot$ UB$(b^a_o, B_{t+1})\}$ \\
+        $ o \xleftarrow{} \operatorname{argmax}_{\{o \in O\ |\ P(o|b, a) > 0\}} \{$  UB$(b^a_o, B_{t+1}) - \operatorname{max}_{\alpha \in \Gamma_{t+1}} \alpha \cdot b^a_o \}$ \\
+        $ B_{t+1} \xleftarrow{} B_{t+1} \cup \{(b^a_o, \infty)\} $ \\
+        $ b \xleftarrow{} b^a_o $\\ 
+    }
+\caption{Belief expansion (expand)}
+\end{algorithm}
+
+
+The number of iterations performed by FiVI is at most $(|A||O|)^h$ as is the number of all beliefs. However, this number of iterations is unlikely as the algorithm leads its exploration to the promising areas of belief space.
+
+\subsection{Heuristics}
+
+TBC
+
 % \LinesNumbered
 % \begin{algorithm}[H]
    
@@ -159,44 +291,13 @@ All algorithms presented in the previous chapter as infinite horizon solvers lac
 
 
 
-\LinesNumbered
-\begin{algorithm}[H]
-    \SetKwInOut{Input}{Input}
-    \SetKwInOut{Output}{Output}
-    
-    \Input{belief $b'$, set $B$ containing belief-bound pairs}
-    \Output{upper bound corresponding to belief $b'$}
-   
-    \SetAlgoLined
-    \For{$(b, \bar{v}) \in B \setminus \{(e_s, \cdot)\ |\ s \in S$}{
-        $f(b) \xleftarrow{} \bar{v} - \sum_{s \in S} b(s) B(e_s)  $ \\
-        $c(b) \xleftarrow{} \operatorname{min}_{s \in S} b'(s)\ /\ b(s) $ \\
-    }
-    $ b^* \xleftarrow{} \operatorname{argmin}_{\{b|(b, \bar{v} \in B \setminus \{e_s\ |\ s \in S\}\}} c(b) f(b) $ \\
-    \textbf{return} $c(b^*) f(b^*) + \sum_{s \in S} b'(s) B(e_s) $ \\
-
-
-\caption{Sawtooth approximation (UB)}
-\end{algorithm}
 
 
 
-\LinesNumbered
-\begin{algorithm}[H]
-    \SetKwInOut{Input}{Input}
-    
-    \Input{M, $\{\Gamma_1, \dots, \Gamma_h\}, \{B_1, \dots, B_h \}$, r}
-   
-    \SetAlgoLined
-    $ b \xleftarrow{} b_1$ \\
-    \For{t = h, h - 1, \dots, 1}{
-        $ a \xleftarrow{} \operatorname{argmax}_{a \in A} \{r_a \cdot b + \sum_{\{o \in O |\ P(o|b, a) > 0\}} P(o| b, a) \cdot$ UB$(b^a_o, B_{t+1})\}$ \\
-        $ o \xleftarrow{} \operatorname{argmax}_{\{o \in O\ |\ P(o|b, a) > 0\}} \{$  UB$(b^a_o, B_{t+1}) - \operatorname{max}_{\alpha \in \Gamma_{t+1}} \alpha \cdot b^a_o \}$ \\
-        $ B_{t+1} \xleftarrow{} B_{t+1} \cup \{(b^a_o, \infty)\} $ \\
-        $ b \xleftarrow{} b^a_o $\\ 
-    }
-\caption{Belief expansion (expand)}
-\end{algorithm}
+
+
+
+
 
 
 

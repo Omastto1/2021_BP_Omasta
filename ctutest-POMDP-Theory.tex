@@ -6,6 +6,8 @@
 
 Up until now, we have dealt with fully observable MDPs. In MDPs, the agent has the perfect knowledge about its position. In practice, however, fully observable environments are scarce. Real-world agents often have only a limited domain of knowledge about their surroundings, making their state uncertain. These environment models are called \textbf{partially observable MDPs} (or POMDPs). With imperfect state information, the functions defined in MDPs are no longer valid, and we have to define new, more powerful methods dealing with stochastic probability distributions rather than with deterministic ones.
 
+ In the following chapter, we will mainly draw on from \cite{russel2010}, but also from \cite{Shani2013}, \cite{pbvi} and \cite{Walraven19}.
+
 \section{POMDP Models}
 
 The POMDPs draw on from MDPs, and thus, some of the model methods remain the same. POMDPs, similar to MDPs, have the transition model $P(s'|s,a)$, states $S$, actions $A(s)$ and reward model $R(s)$ defined. Besides that, the POMDPs also define a new model, which describes the possibility of receiving observations of the agent's surroundings, called the observation function $P(o|s', a)$ and set of observations possible $\Omega$. Unlike MDPs, the POMDPs define the starting position $b_0$ as the initial distribution instead of a deterministic state. 
@@ -94,7 +96,7 @@ The value function improvement, or backup, is an adjustment of the value update 
 
 where
 
-\begin{equation} \label{eq:7} \alpha^{a, o} (s) = \sum_{s' \in S} \alpha (s') O (a, s', o) T(s, a, s').\end{equation}
+\begin{equation} \label{eq:7} \alpha^{a, o} (s) = \sum_{s' \in S} \alpha (s') P(o|a, s') P(s'| s, a).\end{equation}
 
 \LinesNumbered
 \begin{algorithm}[H]
