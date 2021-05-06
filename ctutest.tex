@@ -6,10 +6,9 @@
 % and a couple more: draft and oneside
 \documentclass[twoside]{ctuthesis}
 
-\DeclareUnicodeCharacter{2212}{-}
-\usepackage[ruled,vlined]{algorithm2e}
-\usepackage{float}
-\usepackage{minted}
+
+
+
 
 %\documentclass{article}
 \renewenvironment{description}[1][0pt]
@@ -130,6 +129,30 @@ V Praze, \ctufield{day}.~\monthinlanguage{second}~\ctufield{year}
 \usepackage[pagewise]{lineno}
 \usepackage{lipsum,blindtext}
 \usepackage{mathrsfs} % provides \mathscr used in the ridiculous examples
+\usepackage{graphicx}
+\usepackage{import}
+\usepackage{xifthen}
+\usepackage{pdfpages}
+\usepackage{transparent}
+\usepackage{pdfpages}
+\DeclareUnicodeCharacter{2212}{-}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{float}
+\usepackage{minted}
+\usepackage[justification=centering]{caption}
+\usepackage{siunitx}
+% \usepackage{diagbox}
+% \usepackage{slashbox}
+\newcommand{\makeunderscoreletter}{\catcode`\_=11}
+\newcommand{\makeunderscoreactive}{\catcode`\_=\active}
+
+\newcommand{\incfig}[1]{%
+    \def\svgwidth{\columnwidth}
+    \makeunderscoreletter
+    \import{./pictures/}{#1.pdf_tex}
+    \makeunderscoreactive
+}
+
 
 \begin{document}
 
@@ -152,11 +175,8 @@ V Praze, \ctufield{day}.~\monthinlanguage{second}~\ctufield{year}
 
 \input{ctutest-Profiling}
 
-\input{ctutest-EX-problems}
+\input{ctutest-EX-Problems}
 
-\input{ctutest-EX-benchmark}
-
-\input{ctutest-Validation}
 
 
 \input{ctutest-Conclusion}

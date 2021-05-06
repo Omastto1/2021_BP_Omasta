@@ -27,7 +27,7 @@ In finite horizon problems, we store different value functions $V^{\pi}(t, b)$ a
 % TODO: \right] se nechce vypsat
 \begin{equation}
     V^{\pi^*}(t, b) = \begin{cases} \begin{aligned}
-        \operatorname{max}_{a \in A} \left[ {\sum_{s \in S} R(s, a)b(s) + \sum_{o \in O} & P(o|b, a) V^{\pi ^ *}(t+1, b^a_o) }\right]  && t \leq h \\
+        \operatorname{max}_{a \in A} \Bigg[ \sum_{s \in S} R(s, a)b(s) + \sum_{o \in O} & P(o|b, a) V^{\pi ^ *}(t+1, b^a_o) \Bigg] && t \leq h \\
         & 0 && t > h \\
         \end{aligned} \end{cases}
     ,
@@ -38,7 +38,7 @@ where $b^a_o$ is the belief updated with observation $o$ obtained after executin
 The optimal policy ${\pi}^*$ corresponding to the optimal value function is defined as:
 
 \begin{equation}
-    {\pi}^*(t, b) = \operatorname{argmax}_{a \in A} \left[ {\sum_{s \in S} R(s, a)b(s) + \sum_{o \in O} & P(o|b, a) V^{\pi ^ *}(t+1, b^a_o) }\right].
+{\pi}^*(t, b) = \operatorname{argmax}_{a \in A} \left[ {\sum_{s \in S} R(s, a)b(s) + \sum_{o \in O} P(o|b, a) V^{\pi ^ *}(t+1, b^a_o) }\right].
 \end{equation} 
 
 For time steps from \textit{1} to $h$ the policy returns optimal action corresponding to optimal value-function in time $t$ and belief $b$. 

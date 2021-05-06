@@ -45,7 +45,7 @@ If deemed appropriate, we can replace the normalizing constant with another norm
 \section{Value functions for POMDPs}
 In MDPs, the value function computes the value for each discrete state. With POMDPs having a continuous space of belief vectors, we need to alter the model method further. Instead of computing a policy for a single state, we need to compute utility vectors of length $|S|$, called \textbf{$\alpha$-vectors}, for belief states. The value of belief state then becomes $\sum_{s \in S} b(s) \alpha_p(s)$, where $\alpha_p(s)$ is the utility of executing a policy p in state s. This linear combination can be interpreted as a hyperplane over the belief space \cite{pbvi}. The optimal policy in a given belief then becomes an action a, whose $\alpha$-vector maximizes the dot product with a given belief:
 
-\begin{equation} V(b) = V^{p}^{*}(b) = \operatorname*{max}_p b \cdot \alpha_p \end{equation}
+\begin{equation} V(b) = V^{p^*}(b) = \operatorname*{max}_p b \cdot \alpha_p \end{equation}
 
 More importantly, the previous statements mean that the set of $\alpha$-vectors create a piecewise linear and convex hyperplane \cite{russel2010}.
 
@@ -103,7 +103,7 @@ where
 \SetAlgoLined
 \Repeat{\textit{V has converged} }{
     \ForEach{$b \in B$}{
-        $\alpha \xleftarrow{} backup(b, V)$ \tcc{execute a backup operation on all points in B in arbitrary order}\\
+        $\alpha \xleftarrow{} backup(b, V)$ \tcc{execute a backup operation on all points in B in arbitrary order}
         $V \xleftarrow{} V \bigcup \{\alpha\}$
     }
 }
@@ -151,21 +151,21 @@ $B_{new} \xleftarrow{} B$
 The generic PBVI, while being simple and somewhat clever with its belief set expansion, becomes cumbersome when solving large POMDP instances. However, we often have to expand to large belief sets. Furthermore, we want to keep the possibility to compute a compact value function. To cope with these circumstances, the researchers developed various alternatives and heuristics.
 
 
-\subsection{PERSEUS \cite{perseus}}
+\subsection{Perseus}
 
-The idea of Perseus comes from the Achilles heel of PBVI. The PBVI is cleverly expanding its belief space with the most probable belief states. However, such an approach is significantly demanding. On the other hand, the Perseus algorithm shows that even running random trials and exploring a large number of belief vectors may be more efficient if used with clever value updates.
-
-
-\subsection{HSVI \cite{hsvi}}
-The Perseus algorithm randomization is well suited for small and mid-sized problems but fails in larger ones. The intractability is caused by storing an enormous number of belief vectors. The HSVI algorithm solves this issue by employing a straightforward yet effective heuristic that helps cut down the gap between the upper and lower bounds on the optimal value function. The HSVI stores the belief vector visits and backs them up in the reversed order.
+The idea of Perseus \cite{perseus} comes from the Achilles heel of PBVI. The PBVI is cleverly expanding its belief space with the most probable belief states. However, such an approach is significantly demanding. On the other hand, the Perseus algorithm shows that even running random trials and exploring a large number of belief vectors may be more efficient if used with clever value updates.
 
 
-\subsection{FSVI \cite{fsvi}}
-The FSVI uses another heuristic creating new trajectories by using the best action in the underlying MDP. Such heuristics focus on searching high reward policies but fail to find how information retrieval is essential.
+\subsection{HSVI}
+The Perseus algorithm randomization is well suited for small and mid-sized problems but fails in larger ones. The intractability is caused by storing an enormous number of belief vectors. The HSVI \cite{hsvi} algorithm solves this issue by employing a straightforward yet effective heuristic that helps cut down the gap between the upper and lower bounds on the optimal value function. The HSVI stores the belief vector visits and backs them up in the reversed order.
 
 
-\subsection{SARSOP \cite{sarsop}}
-SARSOP, unlike the others, focuses on calculating a cover of optimal belief space, focusing the search into a smaller area, and removing areas, which the optimal policy will not visit.
+\subsection{FSVI}
+The FSVI \cite{fsvi} uses another heuristic creating new trajectories by using the best action in the underlying MDP. Such heuristics focus on searching high reward policies but fail to find how information retrieval is essential.
+
+
+\subsection{SARSOP}
+SARSOP \cite{sarsop}, unlike the others, focuses on calculating a cover of optimal belief space, focusing the search into a smaller area, and removing areas, which the optimal policy will not visit.
 
 
 % \begin{algorithm}[H]

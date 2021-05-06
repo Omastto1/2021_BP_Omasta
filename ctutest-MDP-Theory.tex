@@ -1,4 +1,3 @@
-%!TEX ROOT=ctutest.tex
 
 
 
@@ -6,7 +5,7 @@
 
 \chapter{Fully Observable Markov Decision Processes}
 
-The Markov decision processes (MDPs) are a part of the optimization problem solvers. The term MDP was probably first used in \cite{cite:1} and came from the name of Russian mathematician Andrey Markov who researched the stochastic processes on which MDPs are based. The MDP problems are described with the environment. The environment consists of states and actions (with corresponding stochastic transitions) for which the agent either pays a cost or receives a reward (negative cost). The agent's task is to minimize his reward. The problem can be finite or infinite according to the problem's description.
+The Markov decision processes (MDPs) are a part of the optimization problem solvers. The term MDP was probably first used in \cite{cite:1} and came from the name of Russian mathematician Andrey Markov who researched the stochastic processes on which MDPs are based. The MDP problems are described with the environment. The environment consists of states and actions (with corresponding stochastic transitions) for which the agent either pays a cost or receives a reward (negative cost). The agent's task is to minimize his cost. The problem can be finite or infinite according to the problem's description.
 
 This chapter will first draw a motivation on why we use MDPs in modeling environments in planning problems. Then define the background of POMDPs, possible approaches to solving MDPs, and in the end, we are going to discuss the advantages of using time-dependent MDPs.
 
@@ -37,7 +36,7 @@ With the environmental properties sorted out, let us move on to MDPs themselves.
 \\
 The definitions, algorithms, and the construction of the following chapters draw on from \cite{Kolobov2012}. 
 
-The Fully Observable Markov Decision Processes (or MDPs) are tuples $\{S, A, T, R)\}$ containing a set of environment states $S$, actions $A$ that the agent can take in corresponding states, stochastic transition function $T$ modeling the relationships between origin states $s$, actions $a$ from them and the distributions of the destination states $s'$. Finally, the MDPs also contain the reward function $R$ that assigns reward (or penalty) to tuples $\{s, a, s'\}$ - for transitions from $s$ to $s'$ executing the action $a$. Or more formally:
+The Fully Observable Markov Decision Processes (or MDPs) are tuples \emph{(S, A, T, R)} containing a set of environment states $S$, actions $A$ that the agent can take in corresponding states, stochastic transition function $T$ modeling the relationships between origin states $s$, actions $a$ from them and the distributions of the destination states $s'$. Finally, the MDPs also contain the reward function $R$ that assigns reward (or penalty) to tuples \emph{(s, a, s')} - for transitions from $s$ to $s'$ when executing the action $a$, or more formally:
 
 \newpage
 \begin{definition}[\textbf{Infinite Horizon Discrete-Time Fully Observable Markov Decision Process (MDP)}]\label{def:MDP}
@@ -51,7 +50,7 @@ A fully observable MDP is a tuple $(S, A, D, T, R)$, where:
 \end{description}
 \end{definition}
 
-To obtain the maximum possible reward in the MDP environment, the agent must execute the best action for every state the agents get to. To determine which action is optimal in each state, we have to evaluate the execution of an action in each state. Say by using simulations. After an infinite number of simulation executions ending in terminal states, we get a vast number of state and action sequences with the value associated with them. The yet unknown mechanism creates a mapping that strives to create a sequence with the best reward from these sequences. Such a mapping of states and actions is called policy. Every agent then operates in its MDP environment by simply following the optimal policy. 
+To obtain the maximum possible reward in the MDP environment, the agent must execute the best action for every state the agents get to. To determine which action is optimal in each state, we have to evaluate the execution of an action in each state. Say by using simulations. After an infinite number of simulation executions ending in terminal states, we get a vast number of state and action sequences with the value associated with them. The yet unknown mechanism creates a mapping that strives to create a sequence with the best reward from these sequences. Such a mapping of states to actions is called policy. Every agent then operates in its MDP environment by simply following the optimal policy. 
 
 However, the number of suboptimal policies obtained while selecting the optimal one is overwhelming, reaching the size of higher-order polynomials. Thus, we are going to define them in a more relaxed way.
 
@@ -118,7 +117,7 @@ The iterative approach does precisely what its name says.
 It starts with a rough estimation and continuously works its way up to the same solution as the linear system. Besides, this solution is optimal \cite{Kolobov2012}. As it stores the previous iteration, it is a part of dynamic programming. Every iteration of this algorithm runs in $O(|S|^2)$.
 
 \LinesNumbered
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 \SetAlgoLined
 //Assumption: $\pi$ is proper (ends up in a goal state) \\
 initialize $V^{\pi}_0$ arbitrarily for each state \\
@@ -138,12 +137,12 @@ We know how to evaluate the environment's state given some policy, but we have n
 
 \subsection{Policy iteration}
 Given that the iterative policy evaluation is optimal after an undefined number of iterations for a specific policy, we can further improve it by iterating policy evaluation and policy improvement.
-For every iteration, we have \textit{almost} optimal policy evaluation for the previous policy. We can improve the policy by iterating over possible actions from all states and choosing that action if it has a lower cost than the previous one. The algorithm stops when the policy remains without a change at the end of the following iteration.
+For every iteration, we have \textit{almost} optimal policy evaluation for the previous policy. We can improve the policy by iterating over possible actions from all states and choosing that action if it has a lower cost than the previous one. The algorithm stops when the policy remains without a change at the end of the following iteration. This is called Policy Iteration \ref{alg:PI}.
 
 \LinesNumbered
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 \SetAlgoLined
-initialize $\pi_0$ to be an arbitrary proper (ending in the goal state) policy \\
+initialize $\pi_0$ to be an arbitrary policy ending in the goal state\\
 $n \xleftarrow{} 0$ \\
 \Repeat{$\pi_n == \pi_{n−1}$ }{
     $n \xleftarrow{} n + 1$ \\
@@ -161,10 +160,10 @@ $n \xleftarrow{} 0$ \\
 }
 return $\pi_n$
 \caption{Policy Iteration}
+\label{alg:PI}
 \end{algorithm}
 
-Until now, whenever we talked about policy iteration, we mentioned that the initial policy has to be proper.
-That is because if we do not meet the initial condition, the policy evaluation step will diverge.
+Until now, whenever we talked about policy iteration, we mentioned that the initial policy has to end in the goal state. That is because if we do not meet the initial condition, the policy evaluation step will diverge.
 Nevertheless, another algorithm can solve this drawback.
 
 
@@ -224,10 +223,10 @@ Logical improvement is to, instead of iterating the whole state space, iterate o
 
 Furthermore, iterating over the separate states means that we can no longer use the number of iterations as a termination condition because we do not know which states' value functions and how often they were updated. The only terminal condition remains maximum residual.
 
-\cite{Kolobov2012} formalizes the intuition in \ref{alg:prior}:
+\cite{Kolobov2012} formalizes the intuition in Algorithm \ref{alg:prior}:
 
 \LinesNumbered
-\begin{algorithm}[h!]
+\begin{algorithm}[!ht]
 \SetAlgoLined
 initialize $V$ \\
 initialize priority queue $q$ \\
@@ -282,7 +281,7 @@ In the previous sections, we have very briefly introduced the notion of MDPs and
 
 \section{Finite-Horizon MDP}
 
-With all the necessary background layed out. Let us present the Finite-Horizon MDP.\\ \\
+With all the necessary background layed out, Let us present the Finite-Horizon MDP.\\ \\
 
 \begin{definition}[\textbf{Finite-Horizon MDP}]
 A finite-horizon MDP is an MDP as described in ~\ref{def:MDP} with a finite number of time steps, i.e., with $|D| = T_{max} < \infty$.
@@ -290,7 +289,7 @@ A finite-horizon MDP is an MDP as described in ~\ref{def:MDP} with a finite numb
 
 
 The Infinite-Horizon MDPs discussed so far are a slightly different class of problems from Finite-Horizon MDPs. However, the solution of Finite-Horizon is somewhat similar to the prioritized value iteration of Infinite-Horizon MDPs. 
-Moreover, each Infinity-Horizon MDP can be transformed into Finite-Horizon one.
+Moreover, each Infinite-Horizon MDP can be transformed into Finite-Horizon one.
 
 This is critical because the Finite-Horizon MDP has an acyclic state space, and \textbf{the acyclic MDPs can be solved optimally using only one backup if used optimal backup order.} \cite{Kolobov2012}
 
