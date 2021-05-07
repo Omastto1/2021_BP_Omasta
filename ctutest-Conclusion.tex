@@ -1,13 +1,23 @@
 
 \chapter{Conclusion}
 
-This thesis deals with the contribution to open-source Julia package \newline \textit{JuliaPOMDP/FiniteHorizonPOMDPs.jl} \cite{FHPOMDP} as a part of the more splendid library \textit{JuliaPOMDP} \cite{JuliaPOMDP}. Its task is to implement an interface for Finite-Horizon evaluations of MDPs. We introduced MDPs and their features, then built the essential MDP solvers theory, showed their advantages and disadvantages, and further improved these methods with prioritization. On its intuition, we finally presented the Finite-Horizon MDPs and summarized why it could be beneficial to use them instead of the Infinite-Horizon ones. 
+This work deals with the contribution to open-source Julia framework \textit{JuliaPOMDP/POMDPs.jl} which combines interoperable interfaces on whose foundation users can implement their own (PO)MDP problem, solver, or any other tool. Users can also use any already existing tool the framework offers. Its task is to implement an interface for Finite Horizon (PO)MDPs, survey and analyze existing methods, and extend the framework with the new solver, emphasizing finite horizon ones.
 
-We also benchmarked our package against the value iteration solver and showed better time and memory performance.
+In this work, we introduced all the necessary background for MDPs and POMDPs, both Infinite Horizon and Finite Horizon, as well as the motivation on why it is beneficial to use Finite Horizon (PO)MDPs in a time-constrained environment. On top of that knowledge, we implemented a missing interface for Finite Horizon (PO)MDPs called \textit{FiniteHorizonPOMDPs.jl} according to its design presented in the package template. With the interface set up, we implemented the \textit{fixhorizon} utility which wraps the Infinite Horizon (PO)MDPs into the Finite Horizon ones. After that, we modified the original Value Iteration algorithm to solve Finite Horizon (PO)MDPs, and in such a way that it serves as the example of a finite horizon solver. The Finite Horizon Value Iteration algorithm clearly builds on top of Infinite Horizon Value Iteration. It introduces the Finite Horizon solvers to an uninformed user in an easy-to-grasp way that demonstrates its structure and benefits.
+
+During the survey of POMDP methods, we found out that the significant \textit{POMDPs.jl} solvers do not support \textit{FiniteHorizonPOMDPs.jl} interface and its modifications are not trivial. Furthermore, we found out that the implementation of \textit{PointBasedValueIteration.jl}, which is the generic solver for all Point-Based solvers, is not implemented correctly. As a result and a solution to a missing way of benchmarking the Finite Horizon POMDPs, we set up an additional task to implement the Point-Based Value Iteration as well. 
+
+With the interface and benchmark solver implemented, we implemented Finite Horizon Point-Based Value Iteration. The FiVI is an excellent starting point for any future contributions to the finite horizon solvers of \textit{POMDPs.jl}. Furthermore, it demonstrates the necessity for specialized Finite Horizon solvers.
+
+Other than previous solvers, this work contributes with additional POMDP models, policies, and other minor changes necessary to provide the Finite Horizon (PO)MDP support.
+
+Finally, we provided benchmarks and experiments to validate our methods' correctness and their advantages. The finite horizon methods clearly show that its Infinite Horizon counterparts do not generalize, and the specialized solvers are essential. The PBVI shows that even that it is a generic solver without any clever heuristic, it still achieves similar results in the long run.
+
+As future work, we are going to improve the support for Finite Horizon POMDPs. The main framework packages support Finite Horizon POMDPs, but there are still a few minor packages that do not, for example, \textit{POMDPSimulators.jl}. Other than that, Finite Horizon (PO)MDPs may well deserve a discrete belief designed for finite horizon specifically. Finally, on behalf of the JuliaPOMDP organization, any further solver contributions are encouraged. 
 
 
-We believe that the package will be of fair use to everyone out there searching for a way to solve their Finite-Horizon MDP  problem with an already written package that is also efficient. The \textit{JuliaPOMDP} \cite{JuliaPOMDP} is an excellent designed general package for work with MDPs, and with the advent of Julia, it will get even more attention.
+We believe that our framework addition will be of fair use to everyone out there searching for a way to solve their Finite-Horizon (PO)MDP problem with an already written package that is also efficient. The \textit{POMDPs.jl} is an excellently designed framework for POMDPs oriented tasks, and with the advent of Julia, it will get even more attention.
 
-In future work, our main goal is to add POMDPs solver, improve the algorithm's efficiency and to create a package rewarding the user for its use.
 
-In conclusion, our project is on its way to deliver a great package and further improve its library environment. With the rise of Julia, it is the best time to contribute to Julian open-source packages.
+In conclusion, our work contributes to an extensive framework \textit{POMDPs.jl} and further improves its library environments. It introduces a whole new branch of problems and other tools not supported by \textit{POMDPs.jl} at the time of its completion. With the rise of Julia, it is the best time to contribute to Julian's open-source packages.
+

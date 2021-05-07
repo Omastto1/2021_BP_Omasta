@@ -2,6 +2,8 @@
 
 This chapter focuses on the practical part of the thesis. In the beginning, we present the POMDPs.jl library we extended with this work and the assigned tasks. Then, we follow up with the analysis and description of the implemented methods. The following chapter presents the benchmark problems, and in the end, we present the validations and benchmarks.
 
+%  TODO ZMINIT ii OPTIMALIZACI
+
 This paper aims to survey and extend the methods implemented in the POMDPs.jl library, emphasizing the finite horizon ones. To add any other methods or interfaces missing to implement such methods and maintain interoperability with the rest of the library. Furthermore, to evaluate the performance of the implemented methods on benchmarks and design new test instances, if applicable.
 
 % And, if applicable, to benchmark the methods against other methods implemented in the library.
@@ -44,7 +46,7 @@ The interface offers unified methods for defining problems (such as \textit{stat
 
 
 \section{Assignment}
-At the assignment time, the POMDPs.jl library does not include the Finite Horizon POMDP solvers, which are the main task of this work. The interface deemed essential for such solvers has been proposed but not completed. Such an interface is needed as the solvers need to operate over single stages while the current interface supports only handling the whole problem representation. Because of that, the objective of this thesis is to implement the interface for Finite Horizon POMDPs and to implement the selected algorithms as a proof of work. For that, we selected the Finite Horizon Value Iteration for MDPs and Point-Based Finite Horizon Value Iteration for POMDPs. These algorithms are the foundations for many improvements already published, making them an excellent starting point for future additions to the library. These algorithms are introduced in \cite{Walraven19} or \cite{Shani2013} and are recommended implementations to any reader interested in developing a new algorithm for the POMDPs.jl library. 
+At the assignment time, the POMDPs.jl framework does not include the Finite Horizon POMDP solvers, which are the main task of this work. The interface deemed essential for such solvers has been proposed but not completed. Such an interface is needed as the solvers need to operate over single stages while the current interface supports only handling the whole problem representation. Because of that, the objective of this thesis is to implement the interface for Finite Horizon POMDPs and to implement the selected algorithms as a proof of work. For that, we selected the Finite Horizon Value Iteration for MDPs and Point-Based Finite Horizon Value Iteration for POMDPs. These algorithms are the foundations for many improvements already published, making them an excellent starting point for future additions to the library. These algorithms are introduced in \cite{Walraven19} or \cite{Shani2013} and are recommended implementations to any reader interested in developing a new algorithm for the POMDPs.jl framework .
 
 We were to evaluate the implemented algorithms against their infinite horizon counterparts. However, while implementing them, we found out that the author of the infinite horizon point-based value iteration POMDPs.jl algorithm, which we formerly wanted to use as a benchmark, implemented it to support only specific POMDPs with two states. Thus, we extended our work to fix and update the infinite horizon point-based value iteration.
 
@@ -77,7 +79,7 @@ And its implementation was to contain the declaration of the following interface
     \item \textit{stage\_actions(m::Union{MDP,POMDP}, t::Int, [s])}
 \end{itemize}
 
-The whole idea of the interface lies on the concept of the \textit{HorizonLength} type, which returns the \textit{FiniteHorizon} or \textit{InfiniteHorizon} type corresponding to either a (PO)MDP being a finite or infinite horizon. In the case where (PO)MDP is a finite horizon, we can obtain the horizon value by calling the \textit{horizon} method and the current stage by calling \textit{stage} method. Furthermore, the interface extends the methods defined for infinite horizon problems by declaring their finite horizon counterparts. Methods belonging to this group are $stage\_states$, which returns states for given stage only, $stage\_stateindex$ which returns the index of a given state in a given stage; $ stage\_observations$ which returns observations for a given stage and $stage\_obsindex$, which returns the index of a given observation in a given stage. FiniteHorizonPOMDPs.jl also defines \textit{ordered\_stage\_states} and \textit{ordered\_stage\_observations} which return ordered states or observations of a given stage. At the time of writing this work, the \textit{stage\_actions} method is not implemented, as most of us known (PO)MDP problems contain actions that span all stages. This view is shared by the JuliaPOMDP community as well.
+The whole idea of the interface lies on the concept of the \textit{HorizonLength} type, which returns the \textit{FiniteHorizon} or \textit{InfiniteHorizon} type corresponding to either a (PO)MDP being a finite or infinite horizon. In the case where (PO)MDP is a finite horizon, we can obtain the horizon value by calling the \textit{horizon} method and the current stage by calling \textit{stage} method. Furthermore, the interface extends the methods defined for infinite horizon problems by declaring their finite horizon counterparts. Methods belonging to this group are $stage\_states$, which returns states for given stage only, $stage\_stateindex$ which returns the index of a given state in a given stage; $ stage\_observations$ which returns observations for a given stage and $stage\_obsindex$, which returns the index of a given observation in a given stage. \emph{FiniteHorizonPOMDPs.jl} also defines \textit{ordered\_stage\_states} and \textit{ordered\_stage\_observations} which return ordered states or observations of a given stage. At the time of writing this work, the \textit{stage\_actions} method is not implemented, as most of us known (PO)MDP problems contain actions that span all stages. This view is shared by the JuliaPOMDP community as well.
 
 By using the combination of methods from FiniteHorizonPOMDPs.jl and other interfaces, the user can define his own finite horizon (PO)MDP problem, (PO)MDP solver or other (PO)MDP tool. At the same time, we recognize it can be difficult, or even lengthy to define one. For exactly these cases, the interface contains the utility, whose goal is to transform the user-defined infinite horizon (PO)MDP into a finite horizon one.  The design concept of the proposal was formerly to define a simple function that would transform a received infinite horizon (PO)MDP into a finite horizon (PO)MDP wrapper:
 
@@ -91,35 +93,22 @@ By using the combination of methods from FiniteHorizonPOMDPs.jl and other interf
 \end{itemize}
 \end{samepage}
 
-Finally, this utility became a set of methods that could easily create a package of its own. However, it is necessary to keep the utility with its original interface to be readily available. 
+Finally, this utility became a set of methods that could easily create a package of its own. However, it is necessary to keep the utility inside of the \emph{FiniteHorizonPOMDPs.jl} package to be easily found and ready to use when using the interface. 
 
 Other than \textit{fixhorizon} method, the utility defines new output types to recognize transformed (PO)MDPs. These types are called \textit{FixedHorizonMDPWrapper} and \textit{FixedHorizonPOMDPWrapper}. If there is no need to differentiate between them, the third type, \textit{FHWrapper}, is used. Thanks to this distinction, Julia Programming Language can dispatch the correct method on each call dynamically.
 
 To distinguish between the states of the infinite horizon (PO)MDP and the finite horizon one, the \textit{fixhorizon} utility introduces a new structure. It wraps the pairs of states or observations and stages into tuples \textit{(state, stage)}, encoding the stage information without much performance loss.
 
-Having defined the type of (PO)MDP, its finite horizon states, and observations, the utility also defines other interface methods required by various solvers. Namely, the POMDPs.jl interface methods ensure proper functionality no matter the finality of (PO)MDP with $transition$, $reward$, $isterminal$, $actions$, $discount$ etc. Methods defined specifically for finite horizon (PO)MDPs from POMDPs.jl interface, which generally return all states or observations for all stages. For example, $states$, $stateindex$, $observations$ or $obsindex$. Moreover, finite horizon (PO)MDPs interface methods implemented in this interface and described in the text above, such as $stage\_states$. Furthermore, the $fixhorizon$ utility implements other methods from $POMDPModelTools.jl$, which defines distributions for (PO)MDPS or methods for ordering states, actions, and observations. The $fix_horizon$ utility also implements the methods from $Random.jl$, offering the mean to compute probabilistic data about the distributions - mean, mode, support, or pdf.
+Having defined the type of (PO)MDP, its finite horizon states, and observations, the utility also defines other interface methods required by various solvers. Namely, the POMDPs.jl interface methods ensure proper functionality no matter the finality of (PO)MDP with $transition$, $reward$, $isterminal$, $actions$, $discount$ etc. Methods defined specifically for finite horizon (PO)MDPs from POMDPs.jl interface, which generally return all states or observations for all stages. For example, $states$, $stateindex$, $observations$ or $obsindex$. Moreover, finite horizon (PO)MDPs interface methods implemented in this interface and described in the text above, such as $stage\_states$. Furthermore, the $fixhorizon$ utility implements other methods from \textit{POMDPModelTools.jl}, which defines distributions for (PO)MDPS or methods for ordering states, actions, and observations. The $fix\_horizon$ utility also implements the methods from $Random.jl$, offering the mean to compute probabilistic data about the distributions - mean, mode, support, or pdf.
 
 
-
-
-REVIDOVAT
-
-
-To define the Finite Horizon (PO)MDP instance, we have to define the methods declared in \textit{JuliaPOMDP/POMDPs.jl} \cite{egorov2017pomdps} or from another library's package. The Finite-Horizon MDP Solver further requires: \textit{stage\_states}, which returns states of a given epoch, \textit{stage\_actions}, which return actions of a given epoch, and \textit{stage\_stateindex}, which return indices of a given state for a given epoch. For example of properly defined MDP see directory \textit{/test/instances}.
-
-TODO: ZMINIT KDE SE NACHAZEJI IMPLEMENTACE
-
-
-
-
+To define the Finite Horizon (PO)MDP instance, the use  has to define the methods declared in \textit{POMDPs.jl} \cite{egorov2017pomdps} and from other library's interfaces based on his solver's choice. At this moment the user is open to choose whether he wants to continue to implement his own Finite Horizon (PO)MDP or if he leverages the utility to transform his Infinite Horizon (PO)MDP to Finite Horizon one. Both approaches are implemented as part of this work at \textit{JuliaPOMDP/FiniteHorizonPOMDPs.jl.} 
 
 \section{Finite Horizon Value Iteration}
 
 \section{DOPSAT PODLE JAKEHO ALGORITMU Z TEORIE JE TOHLE NAPSANE, DOPLNIT REFERENCI}
 
-The Finite Horizon Value Iteration extends the original Value Iteration algorithm. The algorithm iterates over the stages in reversed order from the last stage (excluding the terminal stage) to the first one and solves each stage with the Value Iteration algorithm.
-
-Since this algorithm offers a one-pass optimal solution, after each iteration of solving Value Iteration, its result updates the resulting policy.
+The Finite Horizon Value Iteration (FHVI, implemented at \textit{JuliaPOMDP/FiniteHorizonValueIteration.jl}) extends the original Value Iteration  algorithm (defined in section \ref{VI}) with the knowledge of Finite Horizon MDPs (from section \ref{FHMDP}). The algorithm offers a one-pass optimal solution. The FHVI iterates over the stages in reversed order from the last stage (excluding the terminal stage) to the first one and solves each stage with the Value Iteration algorithm. The resulting policies of all stages are combined into the resulting policy of a whole solver.
 
 The algorithm is written in line with the POMDPs.jl solvers' architecture, consisting of three essential pillars - the structure for storing the algorithm parameters \textit{FiniteHorizonSolver}, the policy structure \textit{FiiteHorizoVakuePolicy} and the method executing the algorithm, \textit{solve}.
 
@@ -148,9 +137,9 @@ end
 \end{minted}
 \end{samepage}
 
-The solver also defines \textit{value} and \textit{action} methods used to give the value or the action of the given state.
+The solver also defines \textit{value} and \textit{action} methods to obtain the value or the action of the given state.
 
-The \textit{solve} method check whether the MDP is a Finite Horizon one, initializes the policy and utility vector, and then reverse iterates over stages (excluding the terminal stage), executing the Value Iteration and updating the policy in each iteration.
+The \textit{solve} method checks whether the MDP is a Finite Horizon one, initializes the policy and utility vector, and then reverse iterates over stages (excluding the terminal stage), executing the Value Iteration and updating the policy in each iteration.
 
 \begin{samepage}
 \begin{minted}{julia}
@@ -168,18 +157,14 @@ end
 \end{samepage}
 
 
-TODO: KONTROLA, PRIPADNE PREPSAT \\
-The implementation is at \cite{FHPOMDP} or APENDIX.
-
-
 \section{PointBasedValueIteration.jl}
 
-The Point-Based Value Iteration (PBVI, JuliaPOMDP/PointBasedValueIteration.jl) algorithm is the second version of the package. However, the former algorithm worked only for two states and completely omitted the expansion phase. The former algorithm initiated the initial belief space with the uniformly distributed beliefs. We fully reimplemented the former algorithm but inspired ourselves with the former version.
+The Point-Based Value Iteration (PBVI, implemented at \textit{JuliaPOMDP/ PointBasedValueIteration.jl}) algorithm is the second version of the package. However, the former algorithm worked only for two states and completely omitted the expansion phase. The former algorithm initiated the initial belief space with the uniformly distributed beliefs. We fully reimplemented the former algorithm but inspired ourselves with the former version.
 
 
-The algorithm accepts problems defined in JuliaPOMDP/POMDPs.jl interface.
+The algorithm accepts problems defined in POMDPs.jl interface.
 
-We hand over the PBVI's setting by the \textit{PBVISolver} structure, which accepts the following parameters: \textit{num\_iteration} denoting the maximal number of iterations the solver is to run, \textit{$\epsilon$} denoting the maximal gap between the $\alpha$-vectors from following iterations of step improvement and \textit{verbose} storing the boolean flag for printing the debug output.
+We hand over the PBVI's setting by the \textit{PBVISolver} structure, which accepts the following parameters: \textit{num\_iteration} denoting the maximal number of iterations the solver is to run, \textit{$\epsilon$} denoting the maximal gap between the $\alpha$-vectors from consecutive iterations of step improvement and \textit{verbose} storing the boolean flag for printing the debug output.
 
 \begin{samepage}
 \begin{minted}[escapeinside=||,mathescape=true]{Julia}
@@ -192,12 +177,12 @@ end
 \end{samepage}
 
 
-The PBVI uses the \textit{AlphaVectorPolicy} defined in \textit{JuliaPOMDP/POMDPPolicies.jl}. The \textit{AlphaVectorPolicy} contains the POMDP \textit{pomdp} to which the policy belongs, \textit{n\_states} storing the number of states, a list of $\alpha$-vectors \textit{alphas}, and a mapping from $\alpha$-vectors to actions \textit{$action\_map$}.
+The PBVI uses the \textit{AlphaVectorPolicy} defined in \textit{POMDPPolicies.jl}. The \textit{AlphaVectorPolicy} contains the POMDP \textit{pomdp} to which the policy belongs, \textit{n\_states} storing the number of states, a list of $\alpha$-vectors \textit{alphas}, and a mapping from $\alpha$-vectors to actions \textit{$action\_map$}.
 
 \begin{samepage}
 \begin{minted}{Julia}
 struct AlphaVectorPolicy{P<:POMDP, A} <: Policy
-    pomdp::P # needed for mapping states to locations in alpha vectors
+    pomdp::P
     n_states::Int
     alphas::Vector{Vector{Float64}}
     action_map::Vector{A}
@@ -206,7 +191,7 @@ end
 \end{samepage}
 
 
-The solve parameters are in line with the POMDPs interface. That is, method solve accepts two parameters, solver's settings and POMDP to be solved. The algorithm is the same as in [TODO: reference the algorithm in theory]. It first initializes all necessary representations and then iterates over the $\alpha$-vectors improvement and belief space expansion. If the expansion algorithm does not find any new belief worth visiting, it terminates the algorithm.
+The \textit{solve} method's parameters are in line with the POMDPs interface. That is, the method \textit{solve} accepts two parameters, solver's settings \textit{solver} and POMDP \textit{pomdp} to be solved. The algorithm is based on the section~\ref{PBVI}. It first initializes all necessary representations, then it iterates over the $\alpha$-vectors and improves them and finally expands the belief space. If the expansion algorithm does not find any new belief worth visiting, it terminates the algorithm.
 
 
 \begin{samepage}
@@ -226,16 +211,9 @@ end
 
 
 \section{Finite Horizon Point-Based Value Iteration}
-Finite Horizon Point-Based Value Iteration (FiVI, TODO: PRIDAT ODKAZ NA REPO) is the state of the art algorithm that leverages the point-based approach and employs the heuristics of the best performing infinite horizon POMDP problem solvers. 
+Finite Horizon Point-Based Value Iteration (FiVI, TODO: PRIDAT ODKAZ NA REPO) is the state of the art algorithm that leverages the point-based approach and employs the heuristics of the best performing infinite horizon POMDP problem solvers in Finite Horizon environments. 
 
-DOPSAT DALSI VECI
-
-
-
-
-
-
-The solver accepts its parameters in form of \textit{FiVISolver} structure. \textit{FiVISolver} supports two arguments. \textit{precision} denoteing the maximum tolerance in the gap between upper and lower bound and \textit{time-limit}.
+The solver accepts its parameters in form of \textit{FiVISolver} structure. \textit{FiVISolver} supports two arguments. \textit{precision} denoteing the maximum tolerance in the gap between upper and lower bound and \textit{time-limit} during which the solver is to be executed.
 
 \begin{samepage}
 \begin{minted}{Julia}
@@ -265,7 +243,7 @@ end
 
 The \textit{solve} method definition is based on the interface, it accepts the algorithm parameters and the problem definition. The algorithm checks whether the problem is a finite horizon POMDP, initiates all variables needed to run the algorithm and sets the upper bound of the beliefs in the terminal stage to zero. The algorithm then iterates in the outer loop until one of terminal conditions evaluates to true. The inner loop iterates over the stages in the reversed order. It sequentially empties the vector of $alpha$-vectors, backups the $\alpha$-vectors of beliefs and update their upper bound. If the terminality conditions evaluate to false, the algorithm expands its belief space.
 
-Unlike in the \cite{Walraven19}, our algorithm expands its belief space as the last thing it does in the outer loop. By using this approach, the algorithm successfully executes. If the algorithm executed the belief space expansion at the beginning of the loop, it would end up calculating with the infinity initiated upper bounds of beliefs. This approach is also used by the algorithm's author in the implementation of the algorithm at (TODO REF: https://github.com/AlgTUDelft/ConstrainedPlanningToolbox/blob/master/src/main/java/algorithms/pomdp/cgcp/FiniteVI.java)
+Unlike in the \cite{Walraven19}, our algorithm expands its belief space as the last thing it does in the outer loop. By using this approach, the algorithm successfully executes. If the algorithm executed the belief space expansion at the beginning of the loop, it would end up calculating with the infinity initiated upper bounds of beliefs and ending up with errors. This approach is also used by the algorithm's author in the implementation of the algorithm here\footnote{https://github.com/AlgTUDelft/ConstrainedPlanningToolbox/blob/master/src/main/java/algorithms/pomdp/cgcp/FiniteVI.java}.
 
 
 
@@ -298,3 +276,17 @@ function solve(solver::FiVISolver, pomdp::POMDP)
 end
 \end{minted}
 \end{samepage}
+
+
+
+
+
+\section{Optimizing and Profiling}
+
+To optimize the solvers and find possible bottlenecks, we used the package \textit{Profiler.jl}. 
+
+It turns out that even if the algorithms are optimized, the biggest bottlenecks are incorrectly implemented user-defined functions. As the solvers heavily depend on the interface methods, every detail on the user's side is relevant. Such functions allocate small memory blocks each time they are called, resulting in massive overhead in memory consumption. Thus, the biggest performance gains are obtained when the methods return tuples or generators instead of arrays. 
+
+On the solvers' side, the most beneficial changes are connected to memory handling as well. For example, instead of pushing the new value to the array in each iteration, we prealocate the array before the loop. Other memory consumption improvements come from caching results, instead of computing them again each time it is necessary.
+
+The next logical step is to vectorize the code. However, this is often not an improvement, as the Julia uses smart optimization of for loops. The Julian vectorization using dot operator makes the code more readable as easily as possible. However, it is the user's task to verify whether the vectorization really improves the performance of the algorithm.
