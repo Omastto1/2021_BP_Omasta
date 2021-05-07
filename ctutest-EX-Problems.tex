@@ -2,11 +2,11 @@
 
 \chapter{Benchmark POMDPs}
 
-UVOD DO PROBLEMU< PROC JSME JE VYRALI< KDE JSOU ULOZENE ATD
+In this chapter, we introduce benchmark problems for both MDP and POMDP solvers and in the end we benchmark and validate solvers implemented as part of this work.
 
 \section{Domains}
 
-In this chapter, we introduce benchmark problems for both MDP and POMDP solvers. We have come up with custom, straightforward, dynamically sized problems sufficient for our validations of MDP solvers. On the other hand, the POMDPs are still actively researched. Examples of POMDP benchmark problems are at \cite{cassandra_1999}. Problems that we use were introduced in \cite{Littman}. The selected POMDP benchmark problems are implemented using the \textit{POMDPs.jl} interface in the \textit{POMDPPolicies.jl} package. In these benchmark problems, we have changed the definition of transitions from terminal states. In \cite{Littman} the author restarts the problem with the uniform transition to non-terminal states. In our implementation, we define the transitions from terminal states as deterministic transitions to themselves. 
+We have come up with custom, straightforward, dynamically sized problems sufficient for our validations of MDP solvers. On the other hand, the POMDPs are still actively researched. Examples of POMDP benchmark problems are at \cite{cassandra_1999}. Problems that we use were introduced in \cite{Littman}. The selected POMDP benchmark problems are implemented using the \textit{POMDPs.jl} interface in the \textit{POMDPModels.jl} package. In these benchmark problems, we have changed the definition of transitions from terminal states. In \cite{Littman} the author restarts the problem with the uniform transition to non-terminal states. In our implementation, we define the transitions from terminal states as deterministic transitions to themselves. 
 
 
 \subsection{1D Grid}

@@ -1,8 +1,9 @@
+
 \chapter{Fully Observable Markov Decision Processes}
 
-The Markov decision processes (MDPs) are a part of the optimization problem solvers. The term MDP was probably first used in \cite{cite:1} and came from the name of Russian mathematician Andrey Markov who researched the stochastic processes on which MDPs are based. The MDP problems are described with the environment. The environment consists of fully observable states and actions (with a corresponding stochastic transition model) for which the agent either pays a cost or receives a reward (negative cost). The agent is an entity that lives inside of an MDP environment, and its task is to minimize the cost of actions he takes. With the agent entity, we can intuitively demonstrate the POMDPs solution. The environment does not change over time. The problem can be finite or infinite according to the problem's description.
+The Markov decision processes (MDPs) are a part of the optimization problem solvers. The term MDP was probably first used in \cite{cite:1} and came from the name of Russian mathematician Andrey Markov who researched the stochastic processes on which MDPs are based. The MDP problems are described with the environment. The environment consists of fully observable states and actions (with a corresponding stochastic transition model) for which the agent either pays a cost or receives a reward. The agent is an entity that lives inside of an MDP environment, and its task is to maximize the reward obtained for its actions. With the agent entity, we can intuitively demonstrate the MDPs solution. The environment does not change over time. The problem can be finite or infinite according to the problem's description.
 
-This chapter will first draw a motivation on why we use MDPs in modeling environments in planning problems. Then define the background of POMDPs, possible approaches to solving MDPs, and in the end, we are going to discuss the advantages of using time-dependent MDPs.
+This chapter will first draw a motivation on why we use MDPs in modeling environments in planning problems. Then define the background of MDPs, possible approaches to solving MDPs, and in the end, we are going to discuss the advantages of using time-dependent MDPs.
 
 The definitions, algorithms, and the construction of the following sections are based on \cite{Kolobov2012}. 
 
@@ -32,7 +33,7 @@ The definitions, algorithms, and the construction of the following sections are 
 % \\ 
 % \\
 
-The Fully Observable Markov Decision Processes (or MDPs) are tuples \emph{(S, A, T, R)} containing a set of environment states $S$, actions $A$ that the agent can execute in corresponding states, stochastic transition function $T$ modeling the relationships between origin states $s$, actions $a$ from them and the distributions of the destination states $s'$. Finally, the MDPs also contain the reward function $R$ that assigns reward (or penalty) to tuples \emph{(s, a, s')} - for transitions from $s$ to $s'$ when executing the action $a$ More formally:
+The Fully Observable Markov Decision Processes (MDPs) are tuples \emph{(S, A, T, R)} containing a set of environment states $S$, actions $A$ that the agent can execute in corresponding states, stochastic transition function $T$ modeling the relationships between origin states $s$, actions $a$ from them and the distributions of the destination states $s'$. Finally, the MDPs also contain the reward function $R$ that assigns reward (or penalty) to tuples \emph{(s, a, s')} - for transitions from $s$ to $s'$ when executing the action $a$ More formally:
 
 
 \begin{definition}[\textbf{Infinite Horizon Fully Observable Markov Decision Process (MDP)}]\label{def:MDP}
@@ -46,18 +47,18 @@ A fully observable MDP is a tuple $(S, A, T, R)$, where:
 \end{description}
 \end{definition}
 
-However, the MDP agent does not have free will. It simply moves as it is ordered. The agent's orders come from a policy. The policy is a function mapping every state to some action. Based on the agent's state, the agent executes an action corresponding to a policy's mapping of the agent's current state. The resulting quality of every policy is then a cost, which the agent receives for following the policy's mappings. In our context, the best quality is the one that is minimal.
+However, the MDP agent does not have free will. It simply moves as it is ordered. The agent's orders come from a policy. The policy is a function mapping every state to some action. Based on the agent's state, the agent executes an action corresponding to a policy's mapping of the agent's current state. The resulting quality of every policy is then a reward, which the agent receives for following the policy's mappings. In our context, the best quality is the maximal one.
 
-Naturally, we want the agent to move in such a way that it minimizes its cost. Such a policy that is better than any other policy is called optimal policy. To select the optimal policy, we have to evaluate all possible policies. The number of possible policies $|A|^{|S|}$ exponentially grows with the increasing size of POMDP state space. Furthermore, we do not consider separate time steps and different possible histories that could lead to a given state s in a time t. The history is a sequence ($s_0, a_0, s_1, a_1, \ldots, s_n$) of consequent states and actions that ends up in the current state $s_n$ by following a policy $p$. Such a formulation would inevitably rise to an uncountable number of policies.
+Naturally, we want the agent to move in such a way that it maximizes its reward. Such a policy that is better than any other policy is called optimal policy. To select the optimal policy, we have to evaluate all possible policies. The number of possible policies $|A|^{|S|}$ exponentially grows with the increasing MDP state space. Furthermore, we do not consider separate time steps and different possible histories that could lead to a given state \textit{s} in a time \textit{t}. The history is a sequence ($s_0, a_0, s_1, a_1, \ldots, s_n$) of consequent states and actions that ends up in the current state $s_n$ by following a policy $\pi$. Such a formulation would inevitably rise to an uncountable number of policies.
 
-Policies that do not distinguish between different histories that end up in the same state simultaneously are called Markovian policies. This relaxation in terminology vastly reduces the number of policies possible to $|A|^{|S|}$.
+Policies that do not distinguish between different histories that end up in the same state simultaneously are called Markovian policies. This relaxation in terminology vastly reduces the number of policies possible to $|A|^{|S|}$. In the following text, we are using the Markovian Policies.
 
 
 % To obtain the maximum possible reward in the MDP environment, the agent must execute the best action for every state the agents get to. To determine which action is optimal in each state, we have to evaluate the execution of an action in each state. Say by using simulations. After an infinite number of simulation executions ending in terminal states, we get a vast number of state and action sequences with the value associated with them. The yet unknown mechanism creates a mapping that strives to create a sequence with the best reward from these sequences. Such a mapping of states to actions is called policy. Every agent then operates in its MDP environment by simply following the optimal policy. 
 
 % However, the number of suboptimal policies obtained while selecting the optimal one is overwhelming, reaching the size of higher-order polynomials. Thus, we are going to define them in a more relaxed way.
 
-% The Markovian Policy does not distinguish between two different sequences ending in the same state at the same time, assigning the same best action to both, vastly reducing the number of policies.
+% The Markovian Policy does not distinguish between two different sequences ending in the same state simultaneously, assigning the same best action to both, vastly reducing the number of policies.
 
 
 \begin{definition}[\textbf{Markovian Policy}]
@@ -65,7 +66,7 @@ A probabilistic (deterministic) history-dependent policy $\pi: H \times A \right
 $\pi(h_{s,t}, a) = \pi(h'_{s,t}, a)$ $(\pi(h_{s,t}) = a$ if and only if $\pi(h_{s,t}) = a)$.
 \end{definition}
 
-Other than a whole policy, we can also evaluate a given state $s$. The value of a given state $s$ is calculated using a value function. The value function $V^{\pi}(s)$ returns the expected reward the agent obtains when executing the actions given by a policy $p$ from a state $s$ that end up in a terminal state. The terminal state stands for a sink state that the agent can not leave. The value function corresponds to $V: S \rightarrow [ \,-\infty, \infty] \,$. In the following text, we will refer to the value function as $V(s, t)$ or $V(s)$.
+Other than a whole policy, we can also evaluate a given state $s$. The value of a given state $s$ is calculated using a value function. The value function $V^{\pi}(s)$ returns the expected reward the agent obtains when executing the actions given by a policy $\pi$ from a state $s$ that end up in a terminal state. The terminal state stands for a sink state that the agent can not leave. The value function corresponds to $V: S \rightarrow [ \,-\infty, \infty] \,$. In the following text, we will refer to the value function as $V(s, t)$ or $V(s)$.
 
 
 % Every state in every time step is evaluated according to \textbf{value function}. A Markovian value function corresponds to $V: S \rightarrow [ \,-\infty, \infty] \,$. In the following text, we will refer to the value function as $V(s, t)$ or $V(s)$.
@@ -96,11 +97,11 @@ It turns out that this approach is even better as it guarantees a fundamental pr
 \section{MDPs techniques}
 
 This part will briefly introduce a few fundamental algorithms for MDPs solving: Brute-Force algorithm, Policy Iteration, Value Iteration, and in the end, we present a possible solution for its disadvantages: Prioritizations. \\
-After reading this section, the reader should know the options for solving MDP and be ready for the following section to discuss the finite horizon's advantages.
+After reading this section, the reader should know the options for solving MDPs and be ready for the following section to discuss the finite horizon's advantages.
 
 \subsection{Brute-Force Algorithm}
-As its name suggests, the Brute-Force algorithm is the most naive algorithm, similar to all problem-solving classes. In evaluating the problem, the method evaluates all possible combinations and chooses the best one.
-Moreover, computer scientists are not using it in the vast majority of cases because the algorithm needs to evaluate $|A|^{|S|}$ policies.
+As its name suggests, the Brute-Force algorithm is the most naive algorithm, similar to all problem-solving classes. During the execution of the solver, the method evaluates all possible output combinations and chooses the best one.
+Moreover, computer scientists are not using it in the vast majority of cases because the algorithm needs to evaluate everything. In MDPs, the number of policies evaluated is $|A|^{|S|}$.
 
 However, as the number of states or actions rises, such evaluation becomes enormous. Another problem is that action outcomes in MDPs are not deterministic, and MDP structure is often cyclic. Both of these problems result in a steep complexity rise in terms of computational resources.
 
@@ -108,12 +109,13 @@ That is why another approach comes in.
 
 \subsection{An iterative approach to policy evaluation}
 
-The evaluation of cyclic environments requires a suitable equation that captures all movements, transitions, and rewards.
-That means that every state's value function should correspond to the sum of rewards for moving towards successor states. Moreover, the agent should maximize its reward from future states. Thus, the successor state's value function multiplied by its probability should also appear in the equation. Let us state the formula as follows:
+The evaluation of cyclic environments requires a suitable equation that captures all transitions and rewards. That means that every state's value function should correspond to the sum of rewards for moving towards successor states. Let us state the formula as follows:
+
+% Moreover, the solver should output such a policy, whose value function for a given state maximizes its reward from future states. Thus, the successor state's value function multiplied by its probability should also appear in the equation. 
 
 \begin{equation}
 \begin{aligned}
-V^{\pi} (s) = \sum_{s' \in S} T(s, \pi (s), s') [ \,-R(s, \pi(s), s') + V^{\pi} (s')]
+V^{\pi} (s) = \sum_{s' \in S} T(s, \pi (s), s') [ \,R(s, \pi(s), s') + V^{\pi} (s')]
 \end{aligned}
 \end{equation}
 
@@ -121,11 +123,11 @@ V^{\pi} (s) = \sum_{s' \in S} T(s, \pi (s), s') [ \,-R(s, \pi(s), s') + V^{\pi} 
 % \begin{equation}
 % \begin{aligned}
 % V^{\pi} (s) & = 0 && \text{(if $s \in G$)} \\
-% & = sum_{s' \in S} T(s, \pi (s), s') [ \,-R(s, \pi(s), s') + V^{\pi} (s')] \, && \text{(otherwise)}
+% & = sum_{s' \in S} T(s, \pi (s), s') [ \,R(s, \pi(s), s') + V^{\pi} (s')] \, && \text{(otherwise)}
 % \end{aligned}
 % \end{equation}
 
-For all states, the formula above forms a system of linear equations. This system of linear equations reduced the complexity of the previous approach. It \textit{can} be solved using Gaussian Elimination in $O(|S|^3)$. It is still not efficient enough, but we use the idea to find a solution with \textbf{an iterative approach}.
+For all states, the formula above forms a system of linear equations. This system of linear equations reduces the complexity of the previous approach. It \textit{can} be solved using Gaussian Elimination in $O(|S|^3)$. It is still not efficient enough, but we use the idea to find a solution with \textbf{an iterative approach}.
 
 The iterative approach starts with a rough estimation and continuously works its way up to the asymptotically same solution as the linear system. The algorithm stops when the maximum gap between two consequent value functions of all states is lesser than a given value, called residual. This solution is optimal \cite{Kolobov2012}. As it stores the previous iteration, it is a part of dynamic programming. Every iteration of this algorithm runs in $O(|S|^2)$.
 
@@ -138,7 +140,7 @@ $n \xleftarrow{} 0$ \\
 \Repeat{$ max_{s\in S} residual_n (s) \leq \epsilon$}{
 $n \xleftarrow{} n + 1$ \\
 \ForEach{$ s \in S $}{
-compute $V^{\pi}_n (s) \xleftarrow{} \sum_{s' \in S} T (s, \pi (s), s') [ \,-R(s, \pi (s), s') + V^{\pi}_{n−1} (s') ] \,$ \\
+compute $V^{\pi}_n (s) \xleftarrow{} \sum_{s' \in S} T (s, \pi (s), s') [ \,R(s, \pi (s), s') + V^{\pi}_{n−1} (s') ] \,$ \\
 compute $residual_n (s) \xleftarrow{} |V^{\pi}_n (s) − V^{\pi}_{n−1} (s)| $ \\
 }
 }
@@ -150,7 +152,7 @@ We know how to evaluate the environment's state given some policy, but we have n
 
 \subsection{Policy iteration}
 Given that the iterative policy evaluation is optimal after an undefined number of iterations for a specific policy, we can further improve it by iterating policy evaluation and policy improvement.
-For every iteration, we have \textit{almost} optimal policy evaluation for the previous policy. We can improve the policy by iterating over possible actions from all states and choosing that action if it has a lower cost than the previous one. The algorithm stops when the policy remains without a change at the end of the following iteration. This is called Policy Iteration \ref{alg:PI}.
+For every iteration, we have \textit{almost} optimal policy evaluation for the previous policy. We can improve the policy by iterating over possible actions from all states and choosing that action if it has a greater reward than the previous one. The algorithm stops when the policy remains without a change after the following iteration. This algorithm is called Policy Iteration \ref{alg:PI}.
 
 \LinesNumbered
 \begin{algorithm}[ht]
@@ -164,9 +166,9 @@ $n \xleftarrow{} 0$ \\
     \ForEach{state $s \in S$}{
         $ \pi_n (s) \xleftarrow{} \pi_{n−1} (s) $ \\
         $ \forall a \in A$ compute $Q^{(V^{\pi_{n−1}})} (s, a) $ \\
-        $ V_n (s) \xleftarrow{} min_{a \in A} Q^{(V^{\pi_{n−1}})} (s, a) $ \\
+        $ V_n (s) \xleftarrow{} max_{a \in A} Q^{(V^{\pi_{n−1}})} (s, a) $ \\
         \uIf{$ Q^{(V^{\pi_{n−1}})} (s, \pi_{n−1} (s)) > V_n (s)$}{
-            $ \pi_n (s) \xleftarrow{} argmin_{a \in A} Q^{(V^{\pi_{n−1}})} (s, a)$
+            $ \pi_n (s) \xleftarrow{} argmax_{a \in A} Q^{(V^{\pi_{n−1}})} (s, a)$
         }
     \textbf{end}
     }
@@ -180,28 +182,41 @@ Until now, whenever we talked about policy iteration, we mentioned that the init
 
 
 \subsection{Value iteration} \label{VI}
-Value iteration focuses on improving the value functions of states instead of evaluating the policy. The algorithm creates a policy at its very end as the action that minimizes the cost in a given state. Thanks to this property, the initial policies are not used in the algorithm and can not lead to divergence.
+Value iteration focuses on improving the value function of all states instead of evaluating the policy. The algorithm creates a policy at its very end to maximize the reward in a given state. Thanks to this property, the initial policies are not used in the algorithm and can not lead to divergence.
 
 The algorithm draws on from \textbf{Bellman equations}, which mathematically express the optimal solution of an MDP.
 
 \begin{equation}
 \begin{aligned}
-V^* (s) & = 0 && \text{(if $s \in G$)} \\
-& = min_{a \in A} Q^* (s, a) &&  (s \notin G) \\ 
-Q^* (s, a) & = \sum_{s' \in S} T(s, a, s')[ \,-R(s, a, s') + V^*(s')] \, \\
+V^* (s) & = max_{a \in A} Q^* (s, a) \\ 
+Q^* (s, a) & = \sum_{s' \in S} T(s, a, s')[ \,R(s, a, s') + V^*(s')]  \\
 \end{aligned}
 \end{equation}
 
-The equation's interpretation is minimizing the optimal value function of a given state. It can have a value of 0 if the state is among the goal states or a value minimizing the result of performing a given action and then following the optimal policy if the state is not.
+% \begin{equation}
+% \begin{aligned}
+% V^* (s) & = 0 && \text{(if $s \in G$)} \\
+% & = max_{a \in A} Q^* (s, a) &&  (s \notin G) \\ 
+% Q^* (s, a) & = \sum_{s' \in S} T(s, a, s')[ \,R(s, a, s') + V^*(s')] \, \\
+% \end{aligned}
+% \end{equation}
+
+The equation's interpretation is maximizing the optimal value function of a given state. It can have a value of 0 if the state is among the goal states or a value-maximizing the result of performing a given action and then following the optimal policy if the state is not.
 
 To approximate $V^* (s)$, the algorithm uses the so-called \textbf{Bellman backup} to improve the current $V_n (s)$ with $V_{n-1} (s')$.
 
 
 \begin{equation}
 \begin{aligned}
-V_n (s) \xleftarrow{} min_{a \in A} \sum_{s' \in S} T(s, a, s') [ \,-R(s, a, s') + V_{n - 1} (s')] \,
+V_n (s) \xleftarrow{} max_{a \in A} \sum_{s' \in S} T(s, a, s') [ \,R(s, a, s') + V_{n - 1} (s')] \,
 \end{aligned}
 \end{equation}
+
+% \begin{equation}
+% \begin{aligned}
+% V_n (s) \xleftarrow{} min_{a \in A} \sum_{s' \in S} T(s, a, s') [ \,R(s, a, s') + V_{n - 1} (s')] \,
+% \end{aligned}
+% \end{equation}
 
 Value iteration is iteratively improving its value function estimation and is guaranteed to converge to the optimal solution \cite{Kolobov2012}. Its stopping criterion is either the maximum residual, the maximal difference between consecutive state value function estimations, or the number of iterations.
 
@@ -217,7 +232,7 @@ $n \xleftarrow{} 0$ \\
         compute $residual_n (s) = |V_n (s) - V_{n-1} (s)|$
         }
     }
-return greedy policy: $\pi^{V_n} (s) = argmin_{a \in A} \sum_{s' \in S} \tau(s, a, s')[ \,C(s, a, s') + V_n (s')] \,$
+return greedy policy: $\pi^{V_n} (s) = argmax_{a \in A} \sum_{s' \in S} \tau(s, a, s')[ \,C(s, a, s') + V_n (s')] \,$
 \caption{Value Iteration}
 \end{algorithm}
 
@@ -255,7 +270,7 @@ return greedy policy $\pi^{V}$
 \label{alg:prior}
 \end{algorithm}
 
-We will introduce a few priority metrics whose features generally differ and may diverge under specific conditions. For details, head over to \cite{Kolobov2012}
+We will introduce a few priority metrics whose features generally differ and may diverge under specific conditions. For details, head over to \cite{Kolobov2012}.
 
 
 \subsubsection{Prioritized Sweeping} 
@@ -285,7 +300,7 @@ Focused Dynamic Programming is a particular case of prioritization techniques us
 
 where:
 \begin{description}[1cm]
-  \item[h(s)] \textit{is lower bound on the expected cost of reaching s from $s_0$}, and
+  \item[h(s)] \textit{is lower bound on the expected reward for reaching s from $s_0$}, and
   \item[V(s)] is regular value function for given state s.
 \end{description}
 
@@ -305,9 +320,9 @@ Moreover, each Infinite-Horizon MDP can be transformed into Finite-Horizon one.
 
 This is critical because the Finite-Horizon MDP has an acyclic state space, and \textbf{the acyclic MDPs can be solved optimally using only one backup if used optimal backup order.} \cite{Kolobov2012}
 
- On the other hand, the transformation to Finite-Horizon MDP %polynomially increases the state space by copying a whole former MDP into a single stage of Finite Horizon POMDP. This way, the memory consumption linearly increases with the number of stages. 
+ On the other hand, the transformation to Finite-Horizon MDP %polynomially increases the state space by copying a whole former MDP into a single stage of Finite Horizon MDP. This way, the memory consumption linearly increases with the number of stages. 
 
-Furthermore, the transformation to Finite Horizon POMDP does not necessarily mean that the result will optimal or even the same. With a finite horizon, the finite horizon agents focus on getting rewards obtainable in a given time span. The Infinite Horizon POMDPs do not have such a constraint and can focus on getting a bigger reward later on.
+Furthermore, the transformation to Finite Horizon MDP does not necessarily mean that the result will optimal or even the same. With a finite horizon, the finite horizon agents focus on getting rewards obtainable in a given time span. The Infinite Horizon MDPs do not have such a constraint and can focus on getting a bigger reward later on.
 
 As the finite horizon number is known, we can evaluate all states' value functions from maximum horizon time and work our way down to starting time. This way, we evaluate each state's successor's value functions, employing optimal backup order and finding the optimal policy on the first pass.
 
